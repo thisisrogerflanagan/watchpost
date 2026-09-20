@@ -1,45 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-
-interface FilingRecord {
-  id: string;
-  accession_number: string;
-  cik: string;
-  title: string;
-  summary_text: string;
-  item_105_flag: boolean;
-  item_502_flag: boolean;
-  filing_date: string;
-  raw_html_url: string;
-  companies?: {
-    ticker?: string;
-    company_name?: string;
-  };
-}
+import { getLatestFilings, FilingRecord } from '../lib/filingRepository';
 
 export default function WatchpostLandingPage() {
   const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
   const [liveSignals, setLiveSignals] = useState<FilingRecord[]>([]);
   const [loadingSignals, setLoadingSignals] = useState(true);
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bfebpgfguqkciohauetg.supabase.co';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_724z32yG9Y1t10fLRkhWjg_V_504oxl';
-
   useEffect(() => {
     async function fetchLiveSignals() {
       try {
         setLoadingSignals(true);
-        const res = await fetch(`${supabaseUrl}/rest/v1/filings?select=*,companies(*)&order=filing_date.desc&limit=4`, {
-          headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`
-          }
-        });
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setLiveSignals(data);
-        }
+        const data = await getLatestFilings(4);
+        setLiveSignals(data);
       } catch (err) {
         console.error('Failed to fetch live database signals:', err);
       } finally {
@@ -48,7 +22,7 @@ export default function WatchpostLandingPage() {
     }
 
     fetchLiveSignals();
-  }, [supabaseUrl, supabaseKey]);
+  }, []);
 
   const handleCheckout = async (priceId: string, planName: string) => {
     try {

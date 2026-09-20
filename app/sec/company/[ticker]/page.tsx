@@ -1,4 +1,5 @@
 import React from 'react';
+import { getFilingsByTicker } from '../../../../lib/filingRepository';
 
 type Props = {
   params: Promise<{ ticker: string }>;
@@ -7,13 +8,14 @@ type Props = {
 export default async function CompanyTickerPSEOPage({ params }: Props) {
   const { ticker } = await params;
   const symbol = ticker.toUpperCase();
+  const filings = await getFilingsByTicker(symbol);
 
   return (
     <div style={{ backgroundColor: '#09090b', color: '#f4f4f5', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
       <header style={{ borderBottom: '1px solid #27272a', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <a href="/" style={{ textDecoration: 'none', color: 'inherit', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{ backgroundColor: '#dc2626', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '12px' }}>SEC 8-K</span>
-          <span style={{ fontWeight: 'bold', fontSize: '18px' }}>CyberSec-8K Radar</span>
+          <span style={{ backgroundColor: '#dc2626', color: '#fff', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold', fontSize: '12px' }}>WATCHPOST HQ</span>
+          <span style={{ fontWeight: 'bold', fontSize: '18px' }}>Watchpost HQ Radar</span>
         </a>
         <a href="/feed" style={{ backgroundColor: '#ffffff', color: '#000000', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', fontSize: '14px', textDecoration: 'none' }}>
           Subscribe to ${symbol} Alerts
@@ -35,21 +37,27 @@ export default async function CompanyTickerPSEOPage({ params }: Props) {
         <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', padding: '24px', marginBottom: '32px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '16px' }}>Automated SEC Filing Audit Log for ${symbol}</h2>
           
-          <div style={{ borderLeft: '2px solid #ef4444', paddingLeft: '16px', marginBottom: '20px' }}>
-            <div style={{ fontSize: '12px', color: '#a1a1aa' }}>Sept 20, 2026 - 14:15 EST</div>
-            <div style={{ fontWeight: 'bold', color: '#ef4444', margin: '4px 0' }}>Item 1.05: Material Cybersecurity Incident Disclosed</div>
-            <p style={{ margin: 0, fontSize: '13px', color: '#d4d4d8' }}>
-              ${symbol} filed an SEC Form 8-K disclosing unauthorized activity detected in their secondary cloud testing environment. Containment completed.
-            </p>
-          </div>
-
-          <div style={{ borderLeft: '2px solid #3b82f6', paddingLeft: '16px' }}>
-            <div style={{ fontSize: '12px', color: '#a1a1aa' }}>August 14, 2026 - 09:30 EST</div>
-            <div style={{ fontWeight: 'bold', color: '#3b82f6', margin: '4px 0' }}>Item 5.02: C-Suite Executive Transition</div>
-            <p style={{ margin: 0, fontSize: '13px', color: '#d4d4d8' }}>
-              ${symbol} announced the appointment of a new Chief Information Security Officer (CISO) in an 8-K Item 5.02 filing.
-            </p>
-          </div>
+          {filings.length === 0 ? (
+            <div style={{ borderLeft: '2px solid #ef4444', paddingLeft: '16px', marginBottom: '20px' }}>
+              <div style={{ fontSize: '12px', color: '#a1a1aa' }}>Monitoring SEC EDGAR 24/7</div>
+              <div style={{ fontWeight: 'bold', color: '#ef4444', margin: '4px 0' }}>Item 1.05 / 5.02 Live Radar Tracked</div>
+              <p style={{ margin: 0, fontSize: '13px', color: '#d4d4d8' }}>
+                ${symbol} is actively monitored for regulatory disclosures. Real-time alerts dispatch immediately upon SEC filing.
+              </p>
+            </div>
+          ) : (
+            filings.map((filing) => (
+              <div key={filing.id} style={{ borderLeft: `2px solid ${filing.item_105_flag ? '#ef4444' : '#3b82f6'}`, paddingLeft: '16px', marginBottom: '20px' }}>
+                <div style={{ fontSize: '12px', color: '#a1a1aa' }}>{new Date(filing.filing_date).toUTCString()}</div>
+                <div style={{ fontWeight: 'bold', color: filing.item_105_flag ? '#ef4444' : '#3b82f6', margin: '4px 0' }}>
+                  {filing.item_105_flag ? 'Item 1.05: Material Cybersecurity Incident Disclosed' : 'Item 5.02: C-Suite Executive Transition'}
+                </div>
+                <p style={{ margin: 0, fontSize: '13px', color: '#d4d4d8' }}>
+                  {filing.summary_text}
+                </p>
+              </div>
+            ))
+          )}
         </div>
 
         <div style={{ backgroundColor: '#09090b', border: '1px solid #dc2626', borderRadius: '8px', padding: '24px', textAlign: 'center' }}>

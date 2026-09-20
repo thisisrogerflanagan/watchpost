@@ -1,22 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-
-interface FilingRecord {
-  id: string;
-  accession_number: string;
-  cik: string;
-  title: string;
-  summary_text: string;
-  item_105_flag: boolean;
-  item_502_flag: boolean;
-  filing_date: string;
-  raw_html_url: string;
-  companies?: {
-    ticker?: string;
-    company_name?: string;
-  };
-}
+import { getLatestFilings, FilingRecord } from '../../lib/filingRepository';
 
 export default function SignalFeedDashboard() {
   const [filings, setFilings] = useState<FilingRecord[]>([]);
@@ -24,23 +9,12 @@ export default function SignalFeedDashboard() {
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bfebpgfguqkciohauetg.supabase.co';
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_724z32yG9Y1t10fLRkhWjg_V_504oxl';
-
   useEffect(() => {
     async function fetchLiveFilings() {
       try {
         setLoading(true);
-        const res = await fetch(`${supabaseUrl}/rest/v1/filings?select=*,companies(*)&order=filing_date.desc&limit=50`, {
-          headers: {
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${supabaseKey}`
-          }
-        });
-        const data = await res.json();
-        if (Array.isArray(data)) {
-          setFilings(data);
-        }
+        const data = await getLatestFilings(50);
+        setFilings(data);
       } catch (err) {
         console.error('Failed to fetch live filings from Supabase:', err);
       } finally {
@@ -49,7 +23,7 @@ export default function SignalFeedDashboard() {
     }
 
     fetchLiveFilings();
-  }, [supabaseUrl, supabaseKey]);
+  }, []);
 
   const filteredFilings = filings.filter(f => {
     const matchesSearch = search === '' || 

@@ -8,10 +8,14 @@ import { createClient } from '@supabase/supabase-js';
 const secLimit = pLimit(8);
 
 export const SEC_HEADERS = {
-  'User-Agent': 'CyberSec8K-Radar/1.0 (contact@cybersec8k-radar.com)',
+  'User-Agent': process.env.SEC_USER_AGENT || 'WatchpostHQ-Radar/1.0 (contact@watchposthq.com)',
   'Accept-Encoding': 'gzip, deflate',
   'Host': 'www.sec.gov'
 };
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bfebpgfguqkciohauetg.supabase.co';
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_724z32yG9Y1t10fLRkhWjg_V_504oxl';
+export const supabase = createClient(supabaseUrl, supabaseKey);
 
 export interface SECAtomEntry {
   title?: string;
@@ -74,26 +78,21 @@ export class SECIngestionEngine {
       href = entry.link['@_href'] || '';
     }
 
-    // Extract CIK number (Padded 10 digits)
     const cikMatch = title.match(/\((\d{10})\)/);
-    const accessionMatch = href.match(/\/data\/\d+\/(\d{18})\//) || entry.id?.match(/(\d{10}-\d{2}-\d{6})/);
+    const accessionMatch = href.match(/\/data\/\d+\/(\d{18})\//) || (entry.id && entry.id.match(/(\d{10}-\d{2}-\d{6})/));
 
     if (!cikMatch) return null;
 
     const cik = cikMatch[1];
     const accessionNumber = accessionMatch ? accessionMatch[1].replace(/-/g, '') : `${cik}-${Date.now()}`;
 
-    // Item 1.05: Material Cybersecurity Incidents
     const isItem105 = /Item\s+1\.05/i.test(summary) || /Cybersecurity Incident/i.test(summary) || /Item\s+1\.05/i.test(title);
-    
-    // Item 5.02: Departure of Directors or Officers; Appointment of Certain Officers
     const isItem502 = /Item\s+5\.02/i.test(summary) || /Departure of Directors/i.test(summary) || /Appointment of Certain Officers/i.test(summary) || /Item\s+5\.02/i.test(title);
 
     const itemsDetected: string[] = [];
     if (isItem105) itemsDetected.push('Item 1.05');
     if (isItem502) itemsDetected.push('Item 5.02');
 
-    // Extract Company Name
     const companyNameMatch = title.match(/8-K\s+-\s+(.*?)\s+\(\d{10}\)/);
     const companyName = companyNameMatch ? companyNameMatch[1].trim() : 'Unknown Filer';
 
@@ -119,19 +118,52 @@ export class SECIngestionEngine {
 
     return this.parseXmlFeed(response.data);
   }
+
+  public async saveSignalsToSupabase(signals: ParsedFilingSignal[]): Promise<number> {
+    let savedCount = 0;
+    for (const signal of signals) {
+      // 1. Ensure company record exists
+      await supabase.from('companies').upsert({
+        cik: signal.cik,
+        company_name: signal.companyName,
+        is_active: true,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'cik' });
+
+      // 2. Insert filing signal
+      const { error } = await supabase.from('filings').upsert({
+        accession_number: signal.accessionNumber,
+        cik: signal.cik,
+        form_type: '8-K',
+        filing_date: signal.filingDate,
+        item_105_flag: signal.isItem105,
+        item_502_flag: signal.isItem502,
+        items_detected: signal.itemsDetected,
+        title: `${signal.companyName} (${signal.isItem105 ? 'Item 1.05 Cyber Incident' : 'Item 5.02 C-Suite Shift'})`,
+        summary_text: signal.summaryText,
+        raw_html_url: signal.filingUrl
+      }, { onConflict: 'accession_number' });
+
+      if (!error) savedCount++;
+    }
+    return savedCount;
+  }
 }
 
 // Execution block when run as script
 if (require.main === module) {
   const engine = new SECIngestionEngine();
-  console.log('[SEC Ingestion] Starting live 8-K polling worker...');
+  console.log('[Watchpost HQ] Starting live SEC EDGAR 8-K ingestion worker...');
   
   engine.fetchLiveEDGARFeed()
-    .then(signals => {
-      console.log(`[SEC Ingestion] Successfully scanned 100 recent 8-Ks. Found ${signals.length} high-value signals (Item 1.05 / 5.02):`);
-      console.dir(signals, { depth: null });
+    .then(async signals => {
+      console.log(`[Watchpost HQ] Scanned SEC feed. Found ${signals.length} high-value signals (Item 1.05 / 5.02).`);
+      if (signals.length > 0) {
+        const saved = await engine.saveSignalsToSupabase(signals);
+        console.log(`[Watchpost HQ] Saved ${saved} signals to Supabase database (https://bfebpgfguqkciohauetg.supabase.co).`);
+      }
     })
     .catch(err => {
-      console.error('[SEC Ingestion Error]:', err.message);
+      console.error('[Watchpost HQ Error]:', err.message);
     });
 }

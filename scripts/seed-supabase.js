@@ -59,35 +59,44 @@ const SAMPLE_FILINGS = [
   }
 ];
 
-async function postToSupabase(table, payload) {
-  const url = `${supabaseUrl}/rest/v1/${table}`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'apikey': supabaseKey,
-      'Authorization': `Bearer ${supabaseKey}`,
-      'Prefer': 'resolution=merge-duplicates'
-    },
-    body: JSON.stringify(payload)
-  });
-  return res.ok;
-}
-
 async function seed() {
-  console.log('[Watchpost HQ] Seeding initial 8-K signals into Supabase database...');
-  
+  console.log('[Watchpost HQ] Inserting sample companies and 8-K filings into Supabase...');
+
   for (const comp of SAMPLE_COMPANIES) {
-    await postToSupabase('companies', comp);
+    const res = await fetch(`${supabaseUrl}/rest/v1/companies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(comp)
+    });
   }
 
   let saved = 0;
   for (const filing of SAMPLE_FILINGS) {
-    const ok = await postToSupabase('filings', filing);
-    if (ok) saved++;
+    const res = await fetch(`${supabaseUrl}/rest/v1/filings`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`,
+        'Prefer': 'resolution=merge-duplicates'
+      },
+      body: JSON.stringify(filing)
+    });
+    
+    if (res.status === 201 || res.status === 200 || res.status === 204) {
+      saved++;
+    } else {
+      const errText = await res.text();
+      console.error('[Supabase Insert Error]:', res.status, errText);
+    }
   }
 
-  console.log(`[Watchpost HQ] Successfully seeded ${saved} initial 8-K signals into Supabase!`);
+  console.log(`[Watchpost HQ] Seeding complete. Successfully inserted ${saved} 8-K filings into Supabase database!`);
 }
 
 seed();

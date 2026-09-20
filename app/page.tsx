@@ -1,48 +1,58 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
-const SAMPLE_SIGNALS = [
-  {
-    ticker: 'CRWD',
-    company: 'CrowdStrike Holdings, Inc.',
-    itemType: 'Item 1.05',
-    title: 'Material Cybersecurity Incident',
-    time: '14 minutes ago',
-    summary: 'Identified unauthorized activity in a secondary cloud testing environment. Materiality determined on Sept 20. Containment completed.',
-  },
-  {
-    ticker: 'MSFT',
-    company: 'Microsoft Corporation',
-    itemType: 'Item 5.02',
-    title: 'C-Suite Executive Transition',
-    time: '42 minutes ago',
-    summary: 'Appointed new Chief Information Security Officer (CISO) effective September 20, 2026.',
-  },
-  {
-    ticker: 'OKTA',
-    company: 'Okta, Inc.',
-    itemType: 'Item 1.05',
-    title: 'Material Cybersecurity Incident',
-    time: '2 hours ago',
-    summary: 'Disclosed credential spray incident impacting an isolated tenant environment. Remediation dispatched.',
-  },
-  {
-    ticker: 'PANW',
-    company: 'Palo Alto Networks, Inc.',
-    itemType: 'Item 5.02',
-    title: 'C-Suite Executive Transition',
-    time: '5 hours ago',
-    summary: 'Announced retirement of Vice President & Chief Information Officer. Executive search initiated.',
-  }
-];
+interface FilingRecord {
+  id: string;
+  accession_number: string;
+  cik: string;
+  title: string;
+  summary_text: string;
+  item_105_flag: boolean;
+  item_502_flag: boolean;
+  filing_date: string;
+  raw_html_url: string;
+  companies?: {
+    ticker?: string;
+    company_name?: string;
+  };
+}
 
 export default function WatchpostLandingPage() {
-  const [loading, setLoading] = useState<string | null>(null);
+  const [loadingCheckout, setLoadingCheckout] = useState<string | null>(null);
+  const [liveSignals, setLiveSignals] = useState<FilingRecord[]>([]);
+  const [loadingSignals, setLoadingSignals] = useState(true);
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://bfebpgfguqkciohauetg.supabase.co';
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_724z32yG9Y1t10fLRkhWjg_V_504oxl';
+
+  useEffect(() => {
+    async function fetchLiveSignals() {
+      try {
+        setLoadingSignals(true);
+        const res = await fetch(`${supabaseUrl}/rest/v1/filings?select=*,companies(*)&order=filing_date.desc&limit=4`, {
+          headers: {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+          }
+        });
+        const data = await res.json();
+        if (Array.isArray(data)) {
+          setLiveSignals(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch live database signals:', err);
+      } finally {
+        setLoadingSignals(false);
+      }
+    }
+
+    fetchLiveSignals();
+  }, [supabaseUrl, supabaseKey]);
 
   const handleCheckout = async (priceId: string, planName: string) => {
     try {
-      setLoading(planName);
+      setLoadingCheckout(planName);
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,14 +62,13 @@ export default function WatchpostLandingPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert('Redirecting to Watchpost HQ radar feed...');
         window.location.href = '/feed';
       }
     } catch (err) {
       console.error(err);
       window.location.href = '/feed';
     } finally {
-      setLoading(null);
+      setLoadingCheckout(null);
     }
   };
 
@@ -81,7 +90,7 @@ export default function WatchpostLandingPage() {
             onClick={() => handleCheckout(proPriceId, 'pro')}
             style={{ backgroundColor: '#ffffff', color: '#000000', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}
           >
-            {loading === 'pro' ? 'Loading Stripe...' : 'Start 7-Day Trial'}
+            {loadingCheckout === 'pro' ? 'Loading Stripe...' : 'Start 7-Day Trial'}
           </button>
         </div>
       </header>
@@ -103,7 +112,7 @@ export default function WatchpostLandingPage() {
             onClick={() => handleCheckout(proPriceId, 'pro')}
             style={{ backgroundColor: '#dc2626', color: '#ffffff', border: 'none', padding: '14px 28px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', cursor: 'pointer' }}
           >
-            {loading === 'pro' ? 'Connecting to Stripe...' : 'Get Instant Slack Alerts ($199/mo)'}
+            {loadingCheckout === 'pro' ? 'Connecting to Stripe...' : 'Get Instant Slack Alerts ($199/mo)'}
           </button>
           <a href="#feed-preview" style={{ backgroundColor: '#27272a', color: '#ffffff', padding: '14px 28px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none' }}>
             View Live Signal Radar ↓
@@ -111,35 +120,43 @@ export default function WatchpostLandingPage() {
         </div>
       </section>
 
-      {/* Live Signal Feed Social Proof Section */}
+      {/* Live Signal Feed Social Proof Section (Dynamic Supabase Query) */}
       <section id="feed-preview" style={{ maxWidth: '900px', margin: '40px auto 80px', padding: '0 24px' }}>
         <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', padding: '24px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', borderBottom: '1px solid #27272a', paddingBottom: '16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }}></span>
-              <h2 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>Watchpost HQ Live Regulatory Stream</h2>
+              <h2 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>Watchpost HQ Live Database Stream</h2>
             </div>
-            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>SEC EDGAR 24/7 Feed</span>
+            <span style={{ fontSize: '12px', color: '#a1a1aa' }}>Verified SEC EDGAR Data</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {SAMPLE_SIGNALS.map((sig, idx) => (
-              <div key={idx} style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#3b82f6' }}>${sig.ticker}</span>
-                    <span style={{ fontWeight: '600', fontSize: '14px' }}>{sig.company}</span>
-                    <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '4px', backgroundColor: sig.itemType === 'Item 1.05' ? 'rgba(220, 38, 38, 0.2)' : 'rgba(37, 99, 235, 0.2)', color: sig.itemType === 'Item 1.05' ? '#ef4444' : '#3b82f6' }}>
-                      {sig.itemType}: {sig.title}
-                    </span>
+            {loadingSignals ? (
+              <div style={{ padding: '24px', textAlign: 'center', color: '#a1a1aa', fontSize: '14px' }}>Connecting to live database...</div>
+            ) : liveSignals.length === 0 ? (
+              <div style={{ padding: '24px', textAlign: 'center', color: '#a1a1aa', fontSize: '14px' }}>No recent 8-K signals in database. Monitoring live SEC feed 24/7.</div>
+            ) : (
+              liveSignals.map((sig) => (
+                <div key={sig.id} style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '8px', padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontWeight: 'bold', fontSize: '16px', color: sig.item_105_flag ? '#ef4444' : '#3b82f6' }}>
+                        {sig.companies?.ticker ? `$${sig.companies.ticker}` : `CIK:${sig.cik}`}
+                      </span>
+                      <span style={{ fontWeight: '600', fontSize: '14px' }}>{sig.companies?.company_name || sig.title}</span>
+                      <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '4px', backgroundColor: sig.item_105_flag ? 'rgba(220, 38, 38, 0.2)' : 'rgba(37, 99, 235, 0.2)', color: sig.item_105_flag ? '#ef4444' : '#3b82f6' }}>
+                        {sig.item_105_flag ? 'ITEM 1.05 BREACH' : 'ITEM 5.02 SHIFT'}
+                      </span>
+                    </div>
+                    <span style={{ fontSize: '12px', color: '#71717a' }}>{new Date(sig.filing_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                   </div>
-                  <span style={{ fontSize: '12px', color: '#71717a' }}>{sig.time}</span>
+                  <p style={{ margin: 0, fontSize: '13px', color: '#a1a1aa', lineHeight: '1.5' }}>
+                    {sig.summary_text}
+                  </p>
                 </div>
-                <p style={{ margin: 0, fontSize: '13px', color: '#a1a1aa', lineHeight: '1.5' }}>
-                  {sig.summary}
-                </p>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </div>
       </section>
@@ -164,7 +181,7 @@ export default function WatchpostLandingPage() {
               onClick={() => handleCheckout(proPriceId, 'pro')}
               style={{ display: 'block', width: '100%', border: 'none', textAlign: 'center', backgroundColor: '#ffffff', color: '#000000', padding: '12px', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}
             >
-              {loading === 'pro' ? 'Redirecting to Stripe...' : 'Start 7-Day Trial'}
+              {loadingCheckout === 'pro' ? 'Redirecting to Stripe...' : 'Start 7-Day Trial'}
             </button>
           </div>
 
@@ -183,7 +200,7 @@ export default function WatchpostLandingPage() {
               onClick={() => handleCheckout(enterprisePriceId, 'enterprise')}
               style={{ display: 'block', width: '100%', border: 'none', textAlign: 'center', backgroundColor: '#dc2626', color: '#ffffff', padding: '12px', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}
             >
-              {loading === 'enterprise' ? 'Redirecting to Stripe...' : 'Start Enterprise Trial'}
+              {loadingCheckout === 'enterprise' ? 'Redirecting to Stripe...' : 'Start Enterprise Trial'}
             </button>
           </div>
         </div>

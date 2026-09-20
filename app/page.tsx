@@ -1,4 +1,6 @@
-import React from 'react';
+'use client';
+
+import React, { useState } from 'react';
 
 const SAMPLE_SIGNALS = [
   {
@@ -36,6 +38,34 @@ const SAMPLE_SIGNALS = [
 ];
 
 export default function WatchpostLandingPage() {
+  const [loading, setLoading] = useState<string | null>(null);
+
+  const handleCheckout = async (priceId: string, planName: string) => {
+    try {
+      setLoading(planName);
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ priceId })
+      });
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert('Redirecting to Watchpost HQ radar feed...');
+        window.location.href = '/feed';
+      }
+    } catch (err) {
+      console.error(err);
+      window.location.href = '/feed';
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const proPriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_PRO || 'prod_VIUfQQaf8yf5f7';
+  const enterprisePriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID_ENTERPRISE || 'prod_VIUfkNhR1k5XTw';
+
   return (
     <div style={{ backgroundColor: '#09090b', color: '#f4f4f5', minHeight: '100vh', fontFamily: 'system-ui, sans-serif' }}>
       {/* Header Navigation */}
@@ -47,9 +77,12 @@ export default function WatchpostLandingPage() {
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           <a href="/feed" style={{ color: '#a1a1aa', textDecoration: 'none', fontSize: '14px' }}>Live Radar Feed</a>
           <a href="#pricing" style={{ color: '#a1a1aa', textDecoration: 'none', fontSize: '14px' }}>Pricing</a>
-          <a href="/feed" style={{ backgroundColor: '#ffffff', color: '#000000', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', fontSize: '14px', textDecoration: 'none' }}>
-            Start 7-Day Trial
-          </a>
+          <button 
+            onClick={() => handleCheckout(proPriceId, 'pro')}
+            style={{ backgroundColor: '#ffffff', color: '#000000', border: 'none', padding: '8px 16px', borderRadius: '6px', fontWeight: '600', fontSize: '14px', cursor: 'pointer' }}
+          >
+            {loading === 'pro' ? 'Loading Stripe...' : 'Start 7-Day Trial'}
+          </button>
         </div>
       </header>
 
@@ -66,9 +99,12 @@ export default function WatchpostLandingPage() {
         </p>
 
         <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-          <a href="/feed" style={{ backgroundColor: '#dc2626', color: '#ffffff', padding: '14px 28px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none' }}>
-            Get Instant Slack Alerts ($199/mo)
-          </a>
+          <button 
+            onClick={() => handleCheckout(proPriceId, 'pro')}
+            style={{ backgroundColor: '#dc2626', color: '#ffffff', border: 'none', padding: '14px 28px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', cursor: 'pointer' }}
+          >
+            {loading === 'pro' ? 'Connecting to Stripe...' : 'Get Instant Slack Alerts ($199/mo)'}
+          </button>
           <a href="#feed-preview" style={{ backgroundColor: '#27272a', color: '#ffffff', padding: '14px 28px', borderRadius: '8px', fontWeight: '600', fontSize: '16px', textDecoration: 'none' }}>
             View Live Signal Radar ↓
           </a>
@@ -124,9 +160,12 @@ export default function WatchpostLandingPage() {
               <li>✓ Item 1.05 (Cyber Breaches) & Item 5.02 (C-Suite)</li>
               <li>✓ Watchpost Web Dashboard Access</li>
             </ul>
-            <a href="/feed" style={{ display: 'block', textAlign: 'center', backgroundColor: '#ffffff', color: '#000000', padding: '12px', borderRadius: '6px', fontWeight: '600', textDecoration: 'none' }}>
-              Start 7-Day Trial
-            </a>
+            <button 
+              onClick={() => handleCheckout(proPriceId, 'pro')}
+              style={{ display: 'block', width: '100%', border: 'none', textAlign: 'center', backgroundColor: '#ffffff', color: '#000000', padding: '12px', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}
+            >
+              {loading === 'pro' ? 'Redirecting to Stripe...' : 'Start 7-Day Trial'}
+            </button>
           </div>
 
           {/* Enterprise Tier */}
@@ -140,9 +179,12 @@ export default function WatchpostLandingPage() {
               <li>✓ 5 Team Member Seats</li>
               <li>✓ SMS On-Call Alert Triggers</li>
             </ul>
-            <a href="/feed" style={{ display: 'block', textAlign: 'center', backgroundColor: '#dc2626', color: '#ffffff', padding: '12px', borderRadius: '6px', fontWeight: '600', textDecoration: 'none' }}>
-              Start Enterprise Trial
-            </a>
+            <button 
+              onClick={() => handleCheckout(enterprisePriceId, 'enterprise')}
+              style={{ display: 'block', width: '100%', border: 'none', textAlign: 'center', backgroundColor: '#dc2626', color: '#ffffff', padding: '12px', borderRadius: '6px', fontWeight: '600', cursor: 'pointer' }}
+            >
+              {loading === 'enterprise' ? 'Redirecting to Stripe...' : 'Start Enterprise Trial'}
+            </button>
           </div>
         </div>
       </section>

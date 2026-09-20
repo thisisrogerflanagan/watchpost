@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>SEC EDGAR 8-K Current Filings</title>
+  <updated>2026-09-20T14:15:00-04:00</updated>
+  <entry>
+    <title>8-K - CROWDSTRIKE HOLDINGS, INC. (0001535527) (Filer)</title>
+    <link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/1535527/000153552726000042/0001535527-26-000042-index.htm"/>
+    <id>urn:tag:sec.gov,2026:accession-0001535527-26-000042</id>
+    <updated>2026-09-20T14:15:00-04:00</updated>
+    <summary type="html">
+      Item 1.05 Material Cybersecurity Incident. On September 18, 2026, CrowdStrike Holdings, Inc. identified unauthorized activity within a secondary cloud testing environment. Forensic assessment determined materiality on September 20. Containment completed.
+    </summary>
+  </entry>
+  <entry>
+    <title>8-K - MICROSOFT CORP (0000789019) (Filer)</title>
+    <link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/789019/000078901926000118/0000789019-26-000118-index.htm"/>
+    <id>urn:tag:sec.gov,2026:accession-0000789019-26-000118</id>
+    <updated>2026-09-20T13:40:00-04:00</updated>
+    <summary type="html">
+      Item 5.02 Departure of Directors or Certain Officers; Election of Directors; Appointment of Certain Officers. Effective September 20, 2026, Microsoft appointed a new Chief Information Security Officer.
+    </summary>
+  </entry>
+  <entry>
+    <title>8-K - ROUTINE ACME CORP (0000123456) (Filer)</title>
+    <link rel="alternate" type="text/html" href="https://www.sec.gov/Archives/edgar/data/123456/000012345626000001/0000123456-26-000001-index.htm"/>
+    <id>urn:tag:sec.gov,2026:accession-0000123456-26-000001</id>
+    <updated>2026-09-20T12:00:00-04:00</updated>
+    <summary type="html">
+      Item 2.02 Results of Operations and Financial Condition. Press release issued announcing quarterly earnings.
+    </summary>
+  </entry>
+</feed>

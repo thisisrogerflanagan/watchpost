@@ -84,7 +84,12 @@ create index if not exists idx_filings_date_502 on public.filings(filing_date de
 create index if not exists idx_filings_accession on public.filings(accession_number);
 create index if not exists idx_companies_trgm_name on public.companies using gin(company_name gin_trgm_ops);
 
--- 8. Row Level Security Policies
+-- 8. Table Permissions & Row Level Security Policies
+grant all on public.companies to anon, authenticated, service_role;
+grant all on public.filings to anon, authenticated, service_role;
+grant all on public.subscribers to anon, authenticated, service_role;
+grant all on public.alerts to anon, authenticated, service_role;
+
 alter table public.companies enable row level security;
 alter table public.filings enable row level security;
 
@@ -94,5 +99,11 @@ do $$ begin
     end if;
     if not exists (select 1 from pg_policies where policyname = 'Allow public read access to filings') then
         create policy "Allow public read access to filings" on public.filings for select using (true);
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Allow public insert access to companies') then
+        create policy "Allow public insert access to companies" on public.companies for insert with check (true);
+    end if;
+    if not exists (select 1 from pg_policies where policyname = 'Allow public insert access to filings') then
+        create policy "Allow public insert access to filings" on public.filings for insert with check (true);
     end if;
 end $$;

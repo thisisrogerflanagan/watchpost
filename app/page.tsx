@@ -1,7 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { dispatchSignalAlert } from '../lib/signalAlertDispatcher';
+import { useAuth } from '../lib/useAuth';
+import { SignUpModal } from '../components/SignUpModal';
 
 interface FilingSignal {
   ticker: string;
@@ -48,9 +51,15 @@ const MOCK_FILINGS: FilingSignal[] = [
 ];
 
 export default function LandingPage() {
+  const { isLoggedIn, user, logout, isMounted } = useAuth();
+
   const [selectedFiling, setSelectedFiling] = useState<FilingSignal>(MOCK_FILINGS[0]);
   const [activeRadarTab, setActiveRadarTab] = useState<'ALL' | '105' | '502'>('ALL');
   const [isAnnual, setIsAnnual] = useState(true);
+
+  // Sign Up / Auth Modal States
+  const [isSignUpModalOpen, setIsSignUpModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signup' | 'login'>('signup');
 
   // Slack Setup Modal States
   const [isSlackModalOpen, setIsSlackModalOpen] = useState(false);
@@ -71,6 +80,11 @@ export default function LandingPage() {
     if (activeRadarTab === '502') return f.itemType === 'Item 5.02';
     return true;
   });
+
+  const openSignUpModal = (mode: 'signup' | 'login' = 'signup') => {
+    setAuthModalMode(mode);
+    setIsSignUpModalOpen(true);
+  };
 
   const handleTestSlackConnect = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -126,13 +140,39 @@ export default function LandingPage() {
             <a href="#features" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>Features</a>
             <a href="#roi" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>ROI Model</a>
             <a href="#pricing" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>Pricing</a>
-            <a href="/feed" style={{ color: '#0f172a', textDecoration: 'none', fontWeight: '700' }}>Log in</a>
-            <button
-              onClick={() => setIsSlackModalOpen(true)}
-              style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '8px 18px', borderRadius: '8px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.15s' }}
-            >
-              Get Watchpost free
-            </button>
+
+            {/* DYNAMIC HEADER BUTTONS: Log in / Get Watchpost Free vs Log out / Open Watchpost */}
+            {isMounted && isLoggedIn ? (
+              <>
+                <button
+                  onClick={logout}
+                  style={{ background: 'none', border: 'none', color: '#475569', fontSize: '14px', fontWeight: '700', cursor: 'pointer', padding: 0 }}
+                >
+                  Log out
+                </button>
+                <Link
+                  href="/feed"
+                  style={{ backgroundColor: '#2563eb', color: '#ffffff', textDecoration: 'none', padding: '8px 18px', borderRadius: '8px', fontSize: '14px', fontWeight: '700', transition: 'background-color 0.15s', display: 'inline-block' }}
+                >
+                  Open Watchpost →
+                </Link>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={() => openSignUpModal('login')}
+                  style={{ background: 'none', border: 'none', color: '#0f172a', fontSize: '14px', fontWeight: '700', cursor: 'pointer', padding: 0 }}
+                >
+                  Log in
+                </button>
+                <button
+                  onClick={() => openSignUpModal('signup')}
+                  style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '8px 18px', borderRadius: '8px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.15s' }}
+                >
+                  Get Watchpost free
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -163,17 +203,17 @@ export default function LandingPage() {
         {/* Action Buttons */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '64px' }}>
           <button
-            onClick={() => setIsSlackModalOpen(true)}
+            onClick={() => openSignUpModal('signup')}
             style={{ backgroundColor: '#2563eb', color: '#ffffff', padding: '14px 28px', borderRadius: '8px', fontWeight: '700', fontSize: '15px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'background-color 0.15s' }}
+          >
+            Get Watchpost Free →
+          </button>
+          <button
+            onClick={() => setIsSlackModalOpen(true)}
+            style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '14px 28px', borderRadius: '8px', fontWeight: '700', fontSize: '15px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'background-color 0.15s' }}
           >
             <span>💬</span> Install Free Slack Bot ($0)
           </button>
-          <a
-            href="#pricing"
-            style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '14px 28px', borderRadius: '8px', fontWeight: '700', fontSize: '15px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.15s' }}
-          >
-            Start $49/mo trial →
-          </a>
         </div>
 
         {/* Interactive Live Radar Drawer Demo (Notion Clean Frame) */}
@@ -453,10 +493,10 @@ Summary: ${selectedFiling.summary}`}
                 </ul>
               </div>
               <button
-                onClick={() => setIsSlackModalOpen(true)}
+                onClick={() => openSignUpModal('signup')}
                 style={{ marginTop: '32px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', color: '#0f172a', textAlign: 'center', padding: '12px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', display: 'block', width: '100%', transition: 'background-color 0.15s' }}
               >
-                Install Free Slack Bot
+                Get Watchpost Free
               </button>
             </div>
 
@@ -479,12 +519,12 @@ Summary: ${selectedFiling.summary}`}
                   <li style={{ color: '#2563eb', fontWeight: '800' }}>✓ 14-Day Free Trial</li>
                 </ul>
               </div>
-              <a
-                href="/feed"
-                style={{ marginTop: '32px', backgroundColor: '#2563eb', color: '#ffffff', textAlign: 'center', padding: '14px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', textDecoration: 'none', display: 'block', transition: 'background-color 0.15s' }}
+              <button
+                onClick={() => openSignUpModal('signup')}
+                style={{ marginTop: '32px', backgroundColor: '#2563eb', color: '#ffffff', border: 'none', textAlign: 'center', padding: '14px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', display: 'block', width: '100%', transition: 'background-color 0.15s' }}
               >
                 Start 14-Day Free Trial →
-              </a>
+              </button>
             </div>
 
             {/* Tier 3: Institutional Analyst ($299/mo) */}
@@ -503,16 +543,23 @@ Summary: ${selectedFiling.summary}`}
                   <li>✓ 5 Workspace User Licenses</li>
                 </ul>
               </div>
-              <a
-                href="/feed"
-                style={{ marginTop: '32px', backgroundColor: '#0f172a', color: '#ffffff', textAlign: 'center', padding: '14px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', textDecoration: 'none', display: 'block', transition: 'background-color 0.15s' }}
+              <button
+                onClick={() => openSignUpModal('signup')}
+                style={{ marginTop: '32px', backgroundColor: '#0f172a', color: '#ffffff', border: 'none', textAlign: 'center', padding: '14px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', display: 'block', width: '100%', transition: 'background-color 0.15s' }}
               >
                 Get Institutional Plan →
-              </a>
+              </button>
             </div>
           </div>
         </div>
       </section>
+
+      {/* Notion-Style Multi-Step Onboarding Modal */}
+      <SignUpModal
+        isOpen={isSignUpModalOpen}
+        onClose={() => setIsSignUpModalOpen(false)}
+        initialMode={authModalMode}
+      />
 
       {/* Slack Setup Modal Overlay */}
       {isSlackModalOpen && (

@@ -7,6 +7,7 @@ import { SignalCard } from './SignalCard';
 import { SignalActionCenter } from './SignalActionCenter';
 import { NotificationAuditFeed } from './NotificationAuditFeed';
 import { FilingAnalyticsCard } from './FilingAnalyticsCard';
+import { useAuth } from '../lib/useAuth';
 
 interface IvoryLayoutProps {
   filings: FilingRecord[];
@@ -14,6 +15,7 @@ interface IvoryLayoutProps {
 }
 
 export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) => {
+  const { user, isLoggedIn, logout } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState('feed');
   const [filterType, setFilterType] = useState('all');
@@ -264,22 +266,45 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
               </span>
             </div>
 
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search ticker or company..."
-              style={{
-                backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9',
-                border: `1px solid ${borderColor}`,
-                color: textColor,
-                padding: '6px 12px',
-                borderRadius: '8px',
-                fontSize: '13px',
-                outline: 'none',
-                width: '200px'
-              }}
-            />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              {isLoggedIn && user ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9', border: `1px solid ${borderColor}`, padding: '4px 12px', borderRadius: '20px', fontSize: '12px' }}>
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
+                  <span style={{ fontWeight: '700', color: textColor }}>{user.workspaceName}</span>
+                  <span style={{ color: subtextColor }}>({user.userEmail})</span>
+                  <button
+                    onClick={logout}
+                    style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: '700', fontSize: '11px', cursor: 'pointer', paddingLeft: '4px' }}
+                  >
+                    Log out
+                  </button>
+                </div>
+              ) : (
+                <a
+                  href="/"
+                  style={{ color: subtextColor, fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}
+                >
+                  ← Home
+                </a>
+              )}
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search ticker or company..."
+                style={{
+                  backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9',
+                  border: `1px solid ${borderColor}`,
+                  color: textColor,
+                  padding: '6px 12px',
+                  borderRadius: '8px',
+                  fontSize: '13px',
+                  outline: 'none',
+                  width: '180px'
+                }}
+              />
+            </div>
           </div>
 
           {/* Filter Pills */}

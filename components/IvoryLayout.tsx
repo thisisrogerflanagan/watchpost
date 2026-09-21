@@ -7,6 +7,7 @@ import { SignalCard } from './SignalCard';
 import { SignalActionCenter } from './SignalActionCenter';
 import { NotificationAuditFeed } from './NotificationAuditFeed';
 import { FilingAnalyticsCard } from './FilingAnalyticsCard';
+import { UpgradeModal } from './UpgradeModal';
 import { useAuth } from '../lib/useAuth';
 
 interface IvoryLayoutProps {
@@ -21,6 +22,7 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
   const [filterType, setFilterType] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedFilingId, setSelectedFilingId] = useState<string | null>(null);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
 
   // New ticker input for Watchlist tab
   const [newTicker, setNewTicker] = useState('');
@@ -732,20 +734,21 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
                 </span>
               </div>
 
-              <a
-                href="#pricing"
+              <button
+                onClick={() => setIsUpgradeModalOpen(true)}
                 style={{
                   backgroundColor: '#dc2626',
                   color: '#ffffff',
-                  padding: '6px 12px',
+                  padding: '6px 14px',
                   borderRadius: '6px',
                   fontSize: '12px',
-                  fontWeight: '600',
-                  textDecoration: 'none'
+                  fontWeight: '700',
+                  border: 'none',
+                  cursor: 'pointer'
                 }}
               >
                 Upgrade Plan
-              </a>
+              </button>
             </header>
 
             {/* Action Center & Analytics Body Container */}
@@ -762,6 +765,13 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
           </section>
         </>
       )}
+
+      {/* Upgrade Plan Modal */}
+      <UpgradeModal
+        isOpen={isUpgradeModalOpen}
+        onClose={() => setIsUpgradeModalOpen(false)}
+        userEmail={user?.userEmail}
+      />
     </div>
   );
 };

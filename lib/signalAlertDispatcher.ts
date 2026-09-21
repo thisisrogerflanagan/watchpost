@@ -1,5 +1,3 @@
-import { Resend } from 'resend';
-
 export interface SignalAlert {
   ticker: string;
   companyName: string;
@@ -21,22 +19,22 @@ export interface DispatcherOptions {
   slackWebhookUrl?: string;
   resendApiKey?: string;
   defaultEmail?: string;
+  defaultSender?: string;
   appUrl?: string;
 }
 
 export class SignalAlertDispatcher {
   private slackWebhookUrl: string;
-  private resendClient: Resend | null;
+  private resendApiKey: string;
   private defaultEmail: string;
+  private defaultSender: string;
   private appUrl: string;
 
   constructor(options: DispatcherOptions = {}) {
     this.slackWebhookUrl = options.slackWebhookUrl || process.env.SLACK_WEBHOOK_URL || '';
-    
-    const apiKey = options.resendApiKey || process.env.RESEND_API_KEY;
-    this.resendClient = apiKey ? new Resend(apiKey) : null;
-    
-    this.defaultEmail = options.defaultEmail || process.env.ALERT_EMAIL_RECIPIENT || 'security-alerts@watchposthq.com';
+    this.resendApiKey = options.resendApiKey || process.env.RESEND_API_KEY || '';
+    this.defaultEmail = options.defaultEmail || process.env.ALERT_EMAIL_RECIPIENT || 'alerts@watchposthq.com';
+    this.defaultSender = options.defaultSender || process.env.ALERT_EMAIL_SENDER || 'Watchpost HQ Alerts <alerts@watchposthq.com>';
     this.appUrl = options.appUrl || process.env.NEXT_PUBLIC_APP_URL || 'https://watchposthq.com';
   }
 
@@ -152,16 +150,25 @@ export class SignalAlertDispatcher {
   }
 
   public async dispatchEmail(alert: SignalAlert): Promise<boolean> {
-    if (!this.resendClient) return false;
+    if (!this.resendApiKey) return false;
     const targetEmail = alert.toEmail || this.defaultEmail;
     const html = this.formatResendHtml(alert);
-    const res = await this.resendClient.emails.send({
-      from: 'Watchpost HQ Alerts <alerts@watchposthq.com>',
-      to: [targetEmail],
-      subject: `🚨 [Watchpost HQ Alert] $${alert.ticker.toUpperCase()} - ${alert.itemType}`,
-      html
+
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${this.resendApiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: this.defaultSender,
+        to: [targetEmail],
+        subject: `🚨 [Watchpost HQ Alert] $${alert.ticker.toUpperCase()} - ${alert.itemType}`,
+        html
+      })
     });
-    return Boolean(res && !res.error);
+
+    return res.ok;
   }
 
   public async dispatchAlert(alert: SignalAlert): Promise<AlertDispatchResult> {
@@ -177,7 +184,7 @@ export class SignalAlertDispatcher {
       }
     }
 
-    if (this.resendClient) {
+    if (this.resendApiKey) {
       try {
         emailSuccess = await this.dispatchEmail(alert);
       } catch (err: any) {

@@ -1,4 +1,5 @@
 import React from 'react';
+import { PostHogProvider } from './providers';
 
 export const metadata = {
   title: 'Watchpost HQ — Real-Time SEC 8-K Regulatory & Breach Intelligence',
@@ -13,7 +14,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body style={{ margin: 0, padding: 0, backgroundColor: '#09090b', color: '#f4f4f5' }}>
-        {children}
+        <PostHogProvider>
+          {children}
+        </PostHogProvider>
       </body>
     </html>
   );

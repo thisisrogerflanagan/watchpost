@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import posthog from 'posthog-js';
 import { getLatestFilings, FilingRecord } from '../lib/filingRepository';
 
 export default function WatchpostLandingPage() {
@@ -27,6 +28,7 @@ export default function WatchpostLandingPage() {
   const handleCheckout = async (priceId: string, planName: string) => {
     try {
       setLoadingCheckout(planName);
+      posthog.capture('checkout_initiated', { plan: planName, price_id: priceId });
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

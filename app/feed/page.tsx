@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import posthog from 'posthog-js';
 import { getLatestFilings, FilingRecord } from '../../lib/filingRepository';
 
 export default function SignalFeedDashboard() {
@@ -8,6 +9,11 @@ export default function SignalFeedDashboard() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filterType, setFilterType] = useState('all');
+
+  const handleFilterChange = (val: string) => {
+    setFilterType(val);
+    posthog.capture('feed_filter_changed', { filter_type: val });
+  };
 
   useEffect(() => {
     async function fetchLiveFilings() {
@@ -76,7 +82,7 @@ export default function SignalFeedDashboard() {
             />
             <select 
               value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
+              onChange={(e) => handleFilterChange(e.target.value)}
               style={{ backgroundColor: '#18181b', border: '1px solid #27272a', color: '#fff', padding: '8px 12px', borderRadius: '6px', fontSize: '14px' }}
             >
               <option value="all">All Item Types</option>

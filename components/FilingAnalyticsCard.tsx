@@ -158,7 +158,7 @@ export const FilingAnalyticsCard: React.FC<FilingAnalyticsCardProps> = ({ filing
               </div>
               <div>
                 <div style={{ fontSize: '16px', fontWeight: '800', color: '#2563eb' }}>{shiftCount}</div>
-                <div style={{ fontSize: '10px', color subtextColor }}>Item 5.02</div>
+                <div style={{ fontSize: '10px', color: subtextColor }}>Item 5.02</div>
               </div>
             </div>
           </div>

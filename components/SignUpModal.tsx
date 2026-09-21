@@ -201,7 +201,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, initi
 
             <form onSubmit={handleStep1Submit}>
               <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#475569', uppercase: true, letterSpacing: '0.05em', marginBottom: '8px' }}>
+                <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
                   WORK EMAIL
                 </label>
                 <input
@@ -449,7 +449,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, initi
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
-                      justify: 'space-between',
+                      justifyContent: 'space-between',
                       transition: 'all 0.15s'
                     }}
                   >

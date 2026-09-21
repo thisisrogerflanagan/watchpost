@@ -108,180 +108,192 @@ export default function LandingPage() {
   };
 
   return (
-    <div style={{ backgroundColor: '#09090b', color: '#f4f4f5', minHeight: '100vh', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
-      {/* Notion Top Navigation */}
-      <nav style={{ borderBottom: '1px solid #27272a', backgroundColor: '#18181b', padding: '14px 24px', position: 'sticky', top: 0, zIndex: 50 }}>
-        <div style={{ maxWidth: '1150px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div style={{ backgroundColor: '#ffffff', color: '#0f172a', minHeight: '100vh', fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', WebkitFontSmoothing: 'antialiased' }}>
+      {/* Notion White Top Navigation */}
+      <nav style={{ borderBottom: '1px solid #e2e8f0', backgroundColor: '#ffffff', padding: '16px 32px', position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(8px)' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span style={{ backgroundColor: '#dc2626', color: '#ffffff', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '900', letterSpacing: '0.05em' }}>
+            <span style={{ backgroundColor: '#0f172a', color: '#ffffff', padding: '4px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '900', letterSpacing: '0.05em' }}>
               SEC RADAR
             </span>
-            <span style={{ fontWeight: '900', fontSize: '18px', color: '#ffffff', letterSpacing: '-0.02em' }}>
-              Watchpost HQ
+            <span style={{ fontWeight: '800', fontSize: '18px', color: '#0f172a', letterSpacing: '-0.03em' }}>
+              Watchpost
             </span>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px', fontSize: '13px', fontWeight: '600' }}>
-            <a href="#radar" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Live Radar</a>
-            <a href="#features" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Features</a>
-            <a href="#roi" style={{ color: '#a1a1aa', textDecoration: 'none' }}>ROI Model</a>
-            <a href="#pricing" style={{ color: '#a1a1aa', textDecoration: 'none' }}>Pricing</a>
-            <a href="/feed" style={{ color: '#ffffff', backgroundColor: '#27272a', border: '1px solid #3f3f46', padding: '6px 14px', borderRadius: '6px', textDecoration: 'none' }}>
-              Open Feed Terminal →
-            </a>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '28px', fontSize: '14px', fontWeight: '600' }}>
+            <a href="#radar" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>Live Radar</a>
+            <a href="#features" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>Features</a>
+            <a href="#roi" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>ROI Model</a>
+            <a href="#pricing" style={{ color: '#475569', textDecoration: 'none', transition: 'color 0.15s' }}>Pricing</a>
+            <a href="/feed" style={{ color: '#0f172a', textDecoration: 'none', fontWeight: '700' }}>Log in</a>
+            <button
+              onClick={() => setIsSlackModalOpen(true)}
+              style={{ backgroundColor: '#2563eb', color: '#ffffff', border: 'none', padding: '8px 18px', borderRadius: '8px', fontSize: '14px', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.15s' }}
+            >
+              Get Watchpost free
+            </button>
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section id="radar" style={{ borderBottom: '1px solid #27272a', padding: '80px 24px', backgroundImage: 'radial-gradient(rgba(63, 63, 70, 0.3) 1px, transparent 1px)', backgroundSize: '24px 24px' }}>
-        <div style={{ maxWidth: '1150px', margin: '0 auto' }}>
-          {/* Status Pill */}
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#18181b', border: '1px solid #27272a', padding: '4px 12px', borderRadius: '20px', fontSize: '12px', marginBottom: '24px' }}>
-            <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
-            <span style={{ fontFamily: 'monospace', fontWeight: '700', color: '#4ade80', fontSize: '11px' }}>LIVE RADAR ACTIVE</span>
-            <span style={{ color: '#3f3f46' }}>|</span>
-            <span style={{ color: '#a1a1aa' }}>Sub-Second SEC EDGAR Ingestion SLA</span>
-          </div>
+      <section id="radar" style={{ padding: '90px 24px 70px', textAlign: 'center', maxWidth: '1180px', margin: '0 auto' }}>
+        {/* Status Pill Badge */}
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', backgroundColor: '#f1f5f9', border: '1px solid #e2e8f0', padding: '6px 16px', borderRadius: '9999px', fontSize: '13px', marginBottom: '32px' }}>
+          <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
+          <span style={{ fontFamily: 'monospace', fontWeight: '800', color: '#166534', fontSize: '12px' }}>SUB-SECOND SEC SLA</span>
+          <span style={{ color: '#cbd5e1' }}>|</span>
+          <span style={{ color: '#475569', fontWeight: '600' }}>EDGAR Item 1.05 &amp; Item 5.02 Live Stream</span>
+        </div>
 
-          {/* Headline */}
-          <h1 style={{ fontSize: '48px', fontWeight: '900', lineHeight: '1.1', margin: '0 0 20px', color: '#ffffff', letterSpacing: '-0.03em', maxWidth: '850px' }}>
-            Detect Material SEC 8-K Breaches &amp; CISO Shifts <span style={{ color: '#38bdf8', borderBottom: '3px solid #38bdf8' }}>Before Headlines</span>.
-          </h1>
+        {/* Headline */}
+        <h1 style={{ fontSize: '64px', fontWeight: '900', lineHeight: '1.08', margin: '0 auto 24px', color: '#0f172a', letterSpacing: '-0.04em', maxWidth: '980px' }}>
+          Where CISOs and IR teams{' '}
+          <span style={{ backgroundColor: '#dcfce7', color: '#166534', padding: '4px 16px', borderRadius: '9999px', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.88em', verticalAlign: 'middle', fontWeight: '800' }}>
+            <span style={{ color: '#16a34a', fontSize: '14px' }}>●</span> Detect
+          </span>{' '}
+          breaches together.
+        </h1>
 
-          <p style={{ fontSize: '18px', color: '#a1a1aa', margin: '0 0 32px', maxWidth: '720px', lineHeight: '1.6' }}>
-            Watchpost HQ monitors SEC EDGAR filings 24/7. Convert raw Form 8-K Item 1.05 cybersecurity breach disclosures and Item 5.02 executive shifts into instant Slack &amp; email outreach playbooks.
-          </p>
+        <p style={{ fontSize: '20px', color: '#475569', margin: '0 auto 36px', maxWidth: '720px', lineHeight: '1.6', fontWeight: '450' }}>
+          Watchpost HQ monitors SEC EDGAR filings 24/7. Convert raw Form 8-K cybersecurity breach disclosures and C-suite leadership changes into instant Slack &amp; email outreach playbooks.
+        </p>
 
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '50px' }}>
-            <button
-              onClick={() => setIsSlackModalOpen(true)}
-              style={{ backgroundColor: '#ffffff', color: '#09090b', padding: '12px 24px', borderRadius: '8px', fontWeight: '800', fontSize: '14px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
-            >
-              <span>💬</span> Install Free Slack Bot ($0)
-            </button>
-            <a href="#pricing" style={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', color: '#ffffff', padding: '12px 24px', borderRadius: '8px', fontWeight: '700', fontSize: '14px', textDecoration: 'none' }}>
-              Start $49/mo Starter Trial →
-            </a>
-          </div>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap', marginBottom: '64px' }}>
+          <button
+            onClick={() => setIsSlackModalOpen(true)}
+            style={{ backgroundColor: '#2563eb', color: '#ffffff', padding: '14px 28px', borderRadius: '8px', fontWeight: '700', fontSize: '15px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px', transition: 'background-color 0.15s' }}
+          >
+            <span>💬</span> Install Free Slack Bot ($0)
+          </button>
+          <a
+            href="#pricing"
+            style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '14px 28px', borderRadius: '8px', fontWeight: '700', fontSize: '15px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', transition: 'background-color 0.15s' }}
+          >
+            Start $49/mo trial →
+          </a>
+        </div>
 
-          {/* Interactive Live Radar Drawer Demo */}
-          <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}>
-            {/* Header bar */}
-            <div style={{ borderBottom: '1px solid #27272a', padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#09090b' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ height: '10px', width: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
-                <span style={{ height: '10px', width: '10px', borderRadius: '50%', backgroundColor: '#eab308' }} />
-                <span style={{ height: '10px', width: '10px', borderRadius: '50%', backgroundColor: '#22c55e' }} />
-                <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#71717a', marginLeft: '8px' }}>watchpost-live-radar-feed.v1</span>
-              </div>
-
-              {/* Filter Tabs */}
-              <div style={{ display: 'flex', gap: '4px', backgroundColor: '#18181b', padding: '3px', borderRadius: '6px', border: '1px solid #27272a' }}>
-                {[
-                  { id: 'ALL', label: 'All Signals' },
-                  { id: '105', label: 'Item 1.05 Breaches' },
-                  { id: '502', label: 'Item 5.02 CISO Moves' }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveRadarTab(tab.id as any)}
-                    style={{
-                      padding: '4px 10px',
-                      borderRadius: '4px',
-                      border: 'none',
-                      backgroundColor: activeRadarTab === tab.id ? '#27272a' : 'transparent',
-                      color: activeRadarTab === tab.id ? '#ffffff' : '#a1a1aa',
-                      fontSize: '11px',
-                      fontWeight: '700',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+        {/* Interactive Live Radar Drawer Demo (Notion Clean Frame) */}
+        <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 20px 40px -15px rgba(15, 23, 42, 0.08)', textAlign: 'left' }}>
+          {/* Header bar */}
+          <div style={{ borderBottom: '1px solid #e2e8f0', padding: '14px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', backgroundColor: '#f8fafc' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ height: '10px', width: '10px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+              <span style={{ height: '10px', width: '10px', borderRadius: '50%', backgroundColor: '#eab308' }} />
+              <span style={{ height: '10px', width: '10px', borderRadius: '50%', backgroundColor: '#22c55e' }} />
+              <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#64748b', marginLeft: '8px', fontWeight: '600' }}>watchpost-live-radar.v1</span>
             </div>
 
-            {/* Content split grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', borderTop: '1px solid #27272a' }}>
-              {/* Left Column: Feed List */}
-              <div style={{ borderRight: '1px solid #27272a' }}>
-                {filteredFilings.map((filing) => {
-                  const isSelected = selectedFiling.ticker === filing.ticker;
-                  return (
-                    <div
-                      key={filing.ticker}
-                      onClick={() => setSelectedFiling(filing)}
-                      style={{
-                        padding: '16px 20px',
-                        borderBottom: '1px solid #27272a',
-                        backgroundColor: isSelected ? '#27272a' : 'transparent',
-                        cursor: 'pointer',
-                        transition: 'background-color 0.15s ease'
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                          <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '13px', backgroundColor: '#09090b', border: '1px solid #3f3f46', color: '#38bdf8', padding: '2px 6px', borderRadius: '4px' }}>
-                            ${filing.ticker}
-                          </span>
-                          <span style={{ fontWeight: '700', fontSize: '14px', color: '#ffffff' }}>{filing.companyName}</span>
-                        </div>
-                        <span style={{ fontSize: '11px', color: '#71717a', fontFamily: 'monospace' }}>{filing.timeAgo}</span>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          fontSize: '10px',
-                          fontWeight: '800',
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          backgroundColor: filing.itemType === 'Item 1.05' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(59, 130, 246, 0.15)',
-                          color: filing.itemType === 'Item 1.05' ? '#ef4444' : '#3b82f6'
-                        }}>
-                          {filing.itemType}
+            {/* Filter Tabs */}
+            <div style={{ display: 'flex', gap: '4px', backgroundColor: '#e2e8f0', padding: '3px', borderRadius: '8px' }}>
+              {[
+                { id: 'ALL', label: 'All Signals' },
+                { id: '105', label: 'Item 1.05 Breaches' },
+                { id: '502', label: 'Item 5.02 CISO Moves' }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveRadarTab(tab.id as any)}
+                  style={{
+                    padding: '5px 12px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    backgroundColor: activeRadarTab === tab.id ? '#ffffff' : 'transparent',
+                    color: activeRadarTab === tab.id ? '#0f172a' : '#64748b',
+                    fontSize: '12px',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: activeRadarTab === tab.id ? '0 1px 3px rgba(0,0,0,0.08)' : 'none'
+                  }}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Content split grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', borderTop: '1px solid #e2e8f0' }}>
+            {/* Left Column: Feed List */}
+            <div style={{ borderRight: '1px solid #e2e8f0', backgroundColor: '#ffffff' }}>
+              {filteredFilings.map((filing) => {
+                const isSelected = selectedFiling.ticker === filing.ticker;
+                return (
+                  <div
+                    key={filing.ticker}
+                    onClick={() => setSelectedFiling(filing)}
+                    style={{
+                      padding: '18px 24px',
+                      borderBottom: '1px solid #f1f5f9',
+                      backgroundColor: isSelected ? '#f8fafc' : '#ffffff',
+                      cursor: 'pointer',
+                      borderLeft: isSelected ? '4px solid #2563eb' : '4px solid transparent',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontFamily: 'monospace', fontWeight: '800', fontSize: '12px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', color: '#0284c7', padding: '2px 8px', borderRadius: '4px' }}>
+                          ${filing.ticker}
                         </span>
-                        <span style={{ fontSize: '12px', color: '#a1a1aa', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '300px' }}>
-                          {filing.summary}
-                        </span>
+                        <span style={{ fontWeight: '800', fontSize: '15px', color: '#0f172a' }}>{filing.companyName}</span>
                       </div>
+                      <span style={{ fontSize: '11px', color: '#64748b', fontFamily: 'monospace', fontWeight: '600' }}>{filing.timeAgo}</span>
                     </div>
-                  );
-                })}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{
+                        fontSize: '10px',
+                        fontWeight: '800',
+                        padding: '2px 8px',
+                        borderRadius: '4px',
+                        backgroundColor: filing.itemType === 'Item 1.05' ? '#fef2f2' : '#eff6ff',
+                        color: filing.itemType === 'Item 1.05' ? '#dc2626' : '#2563eb',
+                        border: filing.itemType === 'Item 1.05' ? '1px solid #fca5a5' : '1px solid #93c5fd'
+                      }}>
+                        {filing.itemType}
+                      </span>
+                      <span style={{ fontSize: '13px', color: '#475569', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '320px' }}>
+                        {filing.summary}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Right Column: Executive Brief Preview */}
+            <div style={{ padding: '28px', backgroundColor: '#f8fafc' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', borderBottom: '1px solid #e2e8f0', paddingBottom: '12px' }}>
+                <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: '800', color: '#64748b', letterSpacing: '0.05em' }}>EXECUTIVE BRIEF PREVIEW</span>
+                <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: '700', fontFamily: 'monospace' }}>✓ VERIFIED EDGAR DISCLOSURE</span>
               </div>
 
-              {/* Right Column: Executive Brief Preview */}
-              <div style={{ padding: '24px', backgroundColor: '#09090b' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #27272a', paddingBottom: '10px' }}>
-                  <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: '800', color: '#a1a1aa' }}>EXECUTIVE BRIEF PREVIEW</span>
-                  <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: '700', fontFamily: 'monospace' }}>✓ VERIFIED EDGAR DISCLOSURE</span>
-                </div>
+              <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', marginBottom: '14px', letterSpacing: '-0.02em' }}>
+                {selectedFiling.companyName} (${selectedFiling.ticker})
+              </div>
 
-                <div style={{ fontSize: '18px', fontWeight: '900', color: '#ffffff', marginBottom: '12px' }}>
-                  {selectedFiling.companyName} (${selectedFiling.ticker})
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '10px', padding: '16px', marginBottom: '16px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+                <div style={{ fontSize: '11px', fontWeight: '800', color: '#2563eb', textTransform: 'uppercase', marginBottom: '6px', letterSpacing: '0.04em' }}>
+                  Executive Signal Intelligence
                 </div>
+                <p style={{ fontSize: '14px', lineHeight: '1.5', color: '#334155', margin: 0 }}>
+                  {selectedFiling.summary}
+                </p>
+              </div>
 
-                <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px', padding: '14px', marginBottom: '16px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#38bdf8', textTransform: 'uppercase', marginBottom: '4px' }}>
-                    Executive Signal Intelligence
-                  </div>
-                  <p style={{ fontSize: '13px', lineHeight: '1.5', color: '#f4f4f5', margin: 0 }}>
-                    {selectedFiling.summary}
-                  </p>
+              <div style={{ backgroundColor: '#ffffff', border: '1px solid #cbd5e1', borderRadius: '10px', padding: '16px', boxShadow: '0 2px 6px rgba(0,0,0,0.02)' }}>
+                <div style={{ fontSize: '11px', fontWeight: '800', color: '#16a34a', marginBottom: '6px', letterSpacing: '0.04em' }}>
+                  💬 Instant Slack Dispatch Payload
                 </div>
-
-                <div style={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', borderRadius: '8px', padding: '14px' }}>
-                  <div style={{ fontSize: '11px', fontWeight: '800', color: '#4ade80', marginBottom: '4px' }}>
-                    💬 Instant Slack Dispatch Payload
-                  </div>
-                  <pre style={{ margin: 0, fontSize: '11.5px', fontFamily: 'monospace', color: '#a1a1aa', whiteSpace: 'pre-wrap' }}>
-                    {`🚨 ${selectedFiling.itemType} DISCLOSURE DETECTED
+                <pre style={{ margin: 0, fontSize: '12px', fontFamily: 'monospace', color: '#475569', whiteSpace: 'pre-wrap', lineHeight: '1.5' }}>
+                  {`🚨 ${selectedFiling.itemType} DISCLOSURE DETECTED
 Company: ${selectedFiling.companyName} ($${selectedFiling.ticker})
 Severity: ${selectedFiling.severity} URGENCY
 Summary: ${selectedFiling.summary}`}
-                  </pre>
-                </div>
+                </pre>
               </div>
             </div>
           </div>
@@ -289,42 +301,42 @@ Summary: ${selectedFiling.summary}`}
       </section>
 
       {/* Latency Benchmark Section */}
-      <section style={{ borderBottom: '1px solid #27272a', padding: '60px 24px', backgroundColor: '#18181b' }}>
-        <div style={{ maxWidth: '1150px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: '800', color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <section id="features" style={{ borderTop: '1px solid #e2e8f0', borderBottom: '1px solid #e2e8f0', padding: '70px 24px', backgroundColor: '#f8fafc' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: '800', color: '#2563eb', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               SPEED SLA BENCHMARK
             </span>
-            <h2 style={{ fontSize: '28px', fontWeight: '900', color: '#ffffff', margin: '6px 0 0' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: '900', color: '#0f172a', margin: '8px 0 0', letterSpacing: '-0.03em' }}>
               Sub-Second Ingestion vs. Legacy Financial Tools
             </h2>
           </div>
 
-          <div style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px', overflow: 'hidden' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '13px' }}>
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 12px rgba(0, 0, 0, 0.03)' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid #27272a', color: '#71717a', fontFamily: 'monospace', fontSize: '11px' }}>
-                  <th style={{ padding: '14px 20px' }}>DISCLOSURE SIGNAL</th>
-                  <th style={{ padding: '14px 20px' }}>SEC PUBLICATION TIME</th>
-                  <th style={{ padding: '14px 20px' }}>WATCHPOST DISPATCH</th>
-                  <th style={{ padding: '14px 20px' }}>BLOOMBERG / RSS DELAY</th>
-                  <th style={{ padding: '14px 20px' }}>SPEED ADVANTAGE</th>
+                <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontFamily: 'monospace', fontSize: '11px', backgroundColor: '#f8fafc' }}>
+                  <th style={{ padding: '16px 24px' }}>DISCLOSURE SIGNAL</th>
+                  <th style={{ padding: '16px 24px' }}>SEC PUBLICATION TIME</th>
+                  <th style={{ padding: '16px 24px' }}>WATCHPOST DISPATCH</th>
+                  <th style={{ padding: '16px 24px' }}>BLOOMBERG / RSS DELAY</th>
+                  <th style={{ padding: '16px 24px' }}>SPEED ADVANTAGE</th>
                 </tr>
               </thead>
-              <tbody style={{ color: '#f4f4f5' }}>
-                <tr style={{ borderBottom: '1px solid #27272a' }}>
-                  <td style={{ padding: '14px 20px', fontWeight: '700' }}>Item 1.05 Material Breach</td>
-                  <td style={{ padding: '14px 20px', fontFamily: 'monospace' }}>16:42:12.102 UTC</td>
-                  <td style={{ padding: '14px 20px', fontFamily: 'monospace', color: '#4ade80', fontWeight: '700' }}>16:42:13.410 UTC</td>
-                  <td style={{ padding: '14px 20px', fontFamily: 'monospace', color: '#ef4444' }}>16:58:20.000 UTC</td>
-                  <td style={{ padding: '14px 20px', fontWeight: '800', color: '#4ade80' }}>+16m 06s Faster</td>
+              <tbody style={{ color: '#0f172a' }}>
+                <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
+                  <td style={{ padding: '18px 24px', fontWeight: '800' }}>Item 1.05 Material Breach</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: '#475569' }}>16:42:12.102 UTC</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: '#16a34a', fontWeight: '800' }}>16:42:13.410 UTC</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: '#dc2626' }}>16:58:20.000 UTC</td>
+                  <td style={{ padding: '18px 24px', fontWeight: '800', color: '#16a34a' }}>+16m 06s Faster</td>
                 </tr>
                 <tr>
-                  <td style={{ padding: '14px 20px', fontWeight: '700' }}>Item 5.02 CISO Leadership Shift</td>
-                  <td style={{ padding: '14px 20px', fontFamily: 'monospace' }}>14:02:04.880 UTC</td>
-                  <td style={{ padding: '14px 20px', fontFamily: 'monospace', color: '#4ade80', fontWeight: '700' }}>14:02:06.120 UTC</td>
-                  <td style={{ padding: '14px 20px', fontFamily: 'monospace', color: '#ef4444' }}>14:24:10.000 UTC</td>
-                  <td style={{ padding: '14px 20px', fontWeight: '800', color: '#4ade80' }}>+22m 04s Faster</td>
+                  <td style={{ padding: '18px 24px', fontWeight: '800' }}>Item 5.02 CISO Leadership Shift</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: '#475569' }}>14:02:04.880 UTC</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: '#16a34a', fontWeight: '800' }}>14:02:06.120 UTC</td>
+                  <td style={{ padding: '18px 24px', fontFamily: 'monospace', color: '#dc2626' }}>14:24:10.000 UTC</td>
+                  <td style={{ padding: '18px 24px', fontWeight: '800', color: '#16a34a' }}>+22m 04s Faster</td>
                 </tr>
               </tbody>
             </table>
@@ -333,22 +345,22 @@ Summary: ${selectedFiling.summary}`}
       </section>
 
       {/* ROI Calculator Section */}
-      <section id="roi" style={{ borderBottom: '1px solid #27272a', padding: '80px 24px', backgroundColor: '#09090b' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '36px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: '800', color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <section id="roi" style={{ borderBottom: '1px solid #e2e8f0', padding: '90px 24px', backgroundColor: '#ffffff' }}>
+        <div style={{ maxWidth: '960px', margin: '0 auto' }}>
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '40px', boxShadow: '0 10px 30px -5px rgba(0,0,0,0.05)' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: '800', color: '#2563eb', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               INTERACTIVE ROI CALCULATOR
             </span>
-            <h2 style={{ fontSize: '26px', fontWeight: '900', color: '#ffffff', margin: '6px 0 24px' }}>
+            <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#0f172a', margin: '8px 0 28px', letterSpacing: '-0.03em' }}>
               Calculate Your IR Retainer &amp; Sales Pipeline Return
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px', alignItems: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '36px', alignItems: 'center' }}>
               <div>
-                <div style={{ marginBottom: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}>
-                    <span>Avg. Retainer / Contract Value:</span>
-                    <span style={{ fontFamily: 'monospace', color: '#38bdf8' }}>${retainerValue.toLocaleString()}</span>
+                <div style={{ marginBottom: '24px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>
+                    <span style={{ color: '#0f172a' }}>Avg. Retainer / Contract Value:</span>
+                    <span style={{ fontFamily: 'monospace', color: '#2563eb', fontWeight: '800' }}>${retainerValue.toLocaleString()}</span>
                   </div>
                   <input
                     type="range"
@@ -357,14 +369,14 @@ Summary: ${selectedFiling.summary}`}
                     step="5000"
                     value={retainerValue}
                     onChange={(e) => setRetainerValue(Number(e.target.value))}
-                    style={{ width: '100%', accentColor: '#38bdf8' }}
+                    style={{ width: '100%', accentColor: '#2563eb' }}
                   />
                 </div>
 
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: '700', marginBottom: '8px' }}>
-                    <span>Target Deals Pitched / Month:</span>
-                    <span style={{ fontFamily: 'monospace', color: '#38bdf8' }}>{pitchesPerMonth} Filings</span>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: '700', marginBottom: '10px' }}>
+                    <span style={{ color: '#0f172a' }}>Target Deals Pitched / Month:</span>
+                    <span style={{ fontFamily: 'monospace', color: '#2563eb', fontWeight: '800' }}>{pitchesPerMonth} Filings</span>
                   </div>
                   <input
                     type="range"
@@ -373,22 +385,22 @@ Summary: ${selectedFiling.summary}`}
                     step="1"
                     value={pitchesPerMonth}
                     onChange={(e) => setPitchesPerMonth(Number(e.target.value))}
-                    style={{ width: '100%', accentColor: '#38bdf8' }}
+                    style={{ width: '100%', accentColor: '#2563eb' }}
                   />
                 </div>
               </div>
 
-              <div style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px', padding: '24px', textAlign: 'center' }}>
-                <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#a1a1aa', textTransform: 'uppercase' }}>
+              <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '28px', textAlign: 'center' }}>
+                <div style={{ fontSize: '11px', fontFamily: 'monospace', color: '#64748b', textTransform: 'uppercase', fontWeight: '800', letterSpacing: '0.05em' }}>
                   ANNUAL PIPELINE OPPORTUNITY
                 </div>
-                <div style={{ fontSize: '36px', fontWeight: '900', color: '#4ade80', margin: '8px 0' }}>
+                <div style={{ fontSize: '42px', fontWeight: '900', color: '#16a34a', margin: '10px 0', letterSpacing: '-0.03em' }}>
                   ${annualRevenueOpportunity.toLocaleString()}
                 </div>
-                <div style={{ fontSize: '12px', color: '#a1a1aa', borderTop: '1px solid #27272a', paddingTop: '12px', marginTop: '12px' }}>
-                  Watchpost Starter Cost: <span style={{ fontFamily: 'monospace', color: '#ffffff' }}>${starterAnnualCost}/yr</span>
+                <div style={{ fontSize: '13px', color: '#475569', borderTop: '1px solid #e2e8f0', paddingTop: '14px', marginTop: '14px' }}>
+                  Watchpost Starter Cost: <span style={{ fontFamily: 'monospace', color: '#0f172a', fontWeight: '800' }}>${starterAnnualCost}/yr</span>
                 </div>
-                <div style={{ fontSize: '13px', fontWeight: '800', color: '#38bdf8', marginTop: '6px' }}>
+                <div style={{ fontSize: '14px', fontWeight: '800', color: '#2563eb', marginTop: '8px' }}>
                   Estimated ROI Multiplier: {roiMultiplier}x Net Return
                 </div>
               </div>
@@ -398,94 +410,103 @@ Summary: ${selectedFiling.summary}`}
       </section>
 
       {/* Pricing Section ($0 / $49 / $299) */}
-      <section id="pricing" style={{ padding: '80px 24px', backgroundColor: '#18181b', borderBottom: '1px solid #27272a' }}>
-        <div style={{ maxWidth: '1150px', margin: '0 auto' }}>
-          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-            <span style={{ fontFamily: 'monospace', fontSize: '11px', fontWeight: '800', color: '#38bdf8', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
+      <section id="pricing" style={{ padding: '90px 24px', backgroundColor: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+            <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: '800', color: '#2563eb', letterSpacing: '0.08em', textTransform: 'uppercase' }}>
               TRANSPARENT SELF-SERVE PRICING
             </span>
-            <h2 style={{ fontSize: '32px', fontWeight: '900', color: '#ffffff', margin: '6px 0 16px' }}>
+            <h2 style={{ fontSize: '36px', fontWeight: '900', color: '#0f172a', margin: '8px 0 20px', letterSpacing: '-0.03em' }}>
               Start Free. Scale as You Win Retainers.
             </h2>
 
             {/* Annual Billing Switch */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', fontSize: '14px', fontWeight: '600' }}>
-              <span style={{ color: !isAnnual ? '#ffffff' : '#a1a1aa' }}>Monthly Billing</span>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px', fontSize: '15px', fontWeight: '700' }}>
+              <span style={{ color: !isAnnual ? '#0f172a' : '#64748b' }}>Monthly Billing</span>
               <button
                 onClick={() => setIsAnnual(!isAnnual)}
-                style={{ width: '48px', height: '24px', borderRadius: '12px', backgroundColor: '#27272a', border: '1px solid #3f3f46', position: 'relative', cursor: 'pointer' }}
+                style={{ width: '52px', height: '28px', borderRadius: '14px', backgroundColor: '#cbd5e1', border: 'none', position: 'relative', cursor: 'pointer', transition: 'background-color 0.15s' }}
               >
-                <span style={{ height: '18px', width: '18px', borderRadius: '50%', backgroundColor: '#ffffff', position: 'absolute', top: '2px', left: isAnnual ? '26px' : '2px', transition: 'left 0.15s ease' }} />
+                <span style={{ height: '22px', width: '22px', borderRadius: '50%', backgroundColor: '#ffffff', position: 'absolute', top: '3px', left: isAnnual ? '27px' : '3px', transition: 'left 0.15s ease', boxShadow: '0 2px 4px rgba(0,0,0,0.15)' }} />
               </button>
-              <span style={{ color: isAnnual ? '#ffffff' : '#a1a1aa' }}>
-                Annual Billing <span style={{ backgroundColor: 'rgba(34, 197, 94, 0.15)', color: '#4ade80', fontSize: '11px', fontWeight: '800', padding: '2px 8px', borderRadius: '12px', marginLeft: '6px' }}>SAVE 20%</span>
+              <span style={{ color: isAnnual ? '#0f172a' : '#64748b' }}>
+                Annual Billing <span style={{ backgroundColor: '#dcfce7', color: '#166534', fontSize: '12px', fontWeight: '800', padding: '3px 10px', borderRadius: '12px', marginLeft: '6px' }}>SAVE 20%</span>
               </span>
             </div>
           </div>
 
           {/* 3 Pricing Cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '28px' }}>
             {/* Tier 1: Free */}
-            <div style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
               <div>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff' }}>Free Signal Radar</div>
-                <div style={{ fontSize: '12px', color: '#a1a1aa', marginTop: '4px' }}>Essential SEC alerts for researchers &amp; BDRs.</div>
-                <div style={{ fontSize: '38px', fontWeight: '900', color: '#ffffff', margin: '20px 0 16px' }}>
-                  $0 <span style={{ fontSize: '12px', color: '#a1a1aa', fontWeight: '400' }}>/ forever</span>
+                <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a' }}>Free Signal Radar</div>
+                <div style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>Essential SEC alerts for researchers &amp; BDRs.</div>
+                <div style={{ fontSize: '44px', fontWeight: '900', color: '#0f172a', margin: '24px 0 20px', letterSpacing: '-0.03em' }}>
+                  $0 <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>/ forever</span>
                 </div>
-                <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '13px', color: '#a1a1aa', lineHeight: '2' }}>
+                <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '14px', color: '#475569', lineHeight: '2.2' }}>
                   <li>✓ 1 Ticker Watchlist</li>
                   <li>✓ 5 SEC Alerts / Month</li>
                   <li>✓ Standard Slack Bot Install</li>
                   <li>✓ Basic Filing Summaries</li>
                 </ul>
               </div>
-              <button onClick={() => setIsSlackModalOpen(true)} style={{ marginTop: '28px', backgroundColor: '#18181b', border: '1px solid #3f3f46', color: '#ffffff', textAlign: 'center', padding: '10px 0', borderRadius: '6px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'block', width: '100%' }}>
+              <button
+                onClick={() => setIsSlackModalOpen(true)}
+                style={{ marginTop: '32px', backgroundColor: '#f1f5f9', border: '1px solid #cbd5e1', color: '#0f172a', textAlign: 'center', padding: '12px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', display: 'block', width: '100%', transition: 'background-color 0.15s' }}
+              >
                 Install Free Slack Bot
               </button>
             </div>
 
-            {/* Tier 2: Starter Plan ($49/mo) */}
-            <div style={{ backgroundColor: '#09090b', border: '2px solid #38bdf8', borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative' }}>
-              <span style={{ position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#38bdf8', color: '#09090b', fontSize: '10px', fontWeight: '900', padding: '2px 10px', borderRadius: '12px', letterSpacing: '0.05em' }}>
-                SELF-SERVE WEDGE (&lt;$50 EXPENSE LIMIT)
+            {/* Tier 2: Analyst Starter ($49/mo) */}
+            <div style={{ backgroundColor: '#ffffff', border: '2px solid #2563eb', borderRadius: '16px', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'relative', boxShadow: '0 12px 30px -10px rgba(37, 99, 235, 0.15)' }}>
+              <span style={{ position: 'absolute', top: '-14px', left: '50%', transform: 'translateX(-50%)', backgroundColor: '#2563eb', color: '#ffffff', fontSize: '11px', fontWeight: '900', padding: '4px 14px', borderRadius: '12px', letterSpacing: '0.04em' }}>
+                MOST POPULAR
               </span>
               <div>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff' }}>Analyst Starter</div>
-                <div style={{ fontSize: '12px', color: '#a1a1aa', marginTop: '4px' }}>Real-time alerts for solo sales reps &amp; consultants.</div>
-                <div style={{ fontSize: '38px', fontWeight: '900', color: '#ffffff', margin: '20px 0 16px' }}>
-                  ${isAnnual ? '39' : '49'} <span style={{ fontSize: '12px', color: '#a1a1aa', fontWeight: '400' }}>/ month</span>
+                <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a' }}>Analyst Starter</div>
+                <div style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>Real-time alerts for solo sales reps &amp; consultants.</div>
+                <div style={{ fontSize: '44px', fontWeight: '900', color: '#0f172a', margin: '24px 0 20px', letterSpacing: '-0.03em' }}>
+                  ${isAnnual ? '39' : '49'} <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>/ month</span>
                 </div>
-                <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '13px', color: '#f4f4f5', lineHeight: '2' }}>
+                <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '14px', color: '#0f172a', lineHeight: '2.2' }}>
                   <li>✓ Unlimited Watchlist Tickers</li>
-                  <li style={{ color: '#4ade80', fontWeight: '700' }}>✓ Real-Time Email &amp; Web Push Alerts</li>
+                  <li style={{ color: '#16a34a', fontWeight: '800' }}>✓ Real-Time Email &amp; Web Push Alerts</li>
                   <li>✓ Full Executive Materiality Summaries</li>
                   <li>✓ Verified LinkedIn CISO Search Links</li>
-                  <li style={{ color: '#38bdf8', fontWeight: '700' }}>✓ 14-Day Free Trial</li>
+                  <li style={{ color: '#2563eb', fontWeight: '800' }}>✓ 14-Day Free Trial</li>
                 </ul>
               </div>
-              <a href="/feed" style={{ marginTop: '28px', backgroundColor: '#38bdf8', color: '#09090b', textAlign: 'center', padding: '12px 0', borderRadius: '6px', fontSize: '13px', fontWeight: '900', textDecoration: 'none', display: 'block' }}>
+              <a
+                href="/feed"
+                style={{ marginTop: '32px', backgroundColor: '#2563eb', color: '#ffffff', textAlign: 'center', padding: '14px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', textDecoration: 'none', display: 'block', transition: 'background-color 0.15s' }}
+              >
                 Start 14-Day Free Trial →
               </a>
             </div>
 
             {/* Tier 3: Institutional Analyst ($299/mo) */}
-            <div style={{ backgroundColor: '#09090b', border: '1px solid #27272a', borderRadius: '12px', padding: '32px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '16px', padding: '36px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 4px 12px rgba(0,0,0,0.03)' }}>
               <div>
-                <div style={{ fontSize: '18px', fontWeight: '800', color: '#ffffff' }}>Institutional Analyst</div>
-                <div style={{ fontSize: '12px', color: '#a1a1aa', marginTop: '4px' }}>For Incident Response firms &amp; MSSP teams.</div>
-                <div style={{ fontSize: '38px', fontWeight: '900', color: '#ffffff', margin: '20px 0 16px' }}>
-                  ${isAnnual ? '239' : '299'} <span style={{ fontSize: '12px', color: '#a1a1aa', fontWeight: '400' }}>/ month</span>
+                <div style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a' }}>Institutional Analyst</div>
+                <div style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>For Incident Response firms &amp; MSSP teams.</div>
+                <div style={{ fontSize: '44px', fontWeight: '900', color: '#0f172a', margin: '24px 0 20px', letterSpacing: '-0.03em' }}>
+                  ${isAnnual ? '239' : '299'} <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>/ month</span>
                 </div>
-                <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '13px', color: '#a1a1aa', lineHeight: '2' }}>
-                  <li style={{ color: '#4ade80', fontWeight: '700' }}>✓ Sub-Second Ingestion Speed SLA</li>
+                <ul style={{ padding: 0, margin: 0, listStyle: 'none', fontSize: '14px', color: '#475569', lineHeight: '2.2' }}>
+                  <li style={{ color: '#16a34a', fontWeight: '800' }}>✓ Sub-Second Ingestion Speed SLA</li>
                   <li>✓ Interactive Slack Block Kit Dispatch</li>
                   <li>✓ 3 AI Outbound Pitch Playbooks</li>
                   <li>✓ Verified CISO / Legal Contact Pathways</li>
                   <li>✓ 5 Workspace User Licenses</li>
                 </ul>
               </div>
-              <a href="/feed" style={{ marginTop: '28px', backgroundColor: '#ffffff', color: '#09090b', textAlign: 'center', padding: '12px 0', borderRadius: '6px', fontSize: '13px', fontWeight: '800', textDecoration: 'none', display: 'block' }}>
+              <a
+                href="/feed"
+                style={{ marginTop: '32px', backgroundColor: '#0f172a', color: '#ffffff', textAlign: 'center', padding: '14px 0', borderRadius: '8px', fontSize: '14px', fontWeight: '800', textDecoration: 'none', display: 'block', transition: 'background-color 0.15s' }}
+              >
                 Get Institutional Plan →
               </a>
             </div>
@@ -495,27 +516,27 @@ Summary: ${selectedFiling.summary}`}
 
       {/* Slack Setup Modal Overlay */}
       {isSlackModalOpen && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '24px' }}>
-          <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '32px', maxWidth: '520px', width: '100%', boxShadow: '0 25px 50px rgba(0,0,0,0.7)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '24px' }}>
+          <div style={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '20px', padding: '36px', maxWidth: '520px', width: '100%', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '20px' }}>💬</span>
-                <h3 style={{ fontSize: '18px', fontWeight: '900', color: '#ffffff', margin: 0 }}>
+                <span style={{ fontSize: '24px' }}>💬</span>
+                <h3 style={{ fontSize: '20px', fontWeight: '900', color: '#0f172a', margin: 0 }}>
                   Connect Free Slack Alert Bot
                 </h3>
               </div>
-              <button onClick={() => setIsSlackModalOpen(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '20px', cursor: 'pointer' }}>
+              <button onClick={() => setIsSlackModalOpen(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#64748b', fontSize: '22px', cursor: 'pointer', fontWeight: '700' }}>
                 ✕
               </button>
             </div>
 
-            <p style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: '1.5', margin: '0 0 20px' }}>
+            <p style={{ fontSize: '14px', color: '#475569', lineHeight: '1.6', margin: '0 0 24px' }}>
               Connect Watchpost HQ to your Slack workspace in 2 steps to receive instant SEC Item 1.05 breach notifications directly in your team channel.
             </p>
 
             <form onSubmit={handleTestSlackConnect}>
-              <div style={{ marginBottom: '16px' }}>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#ffffff', marginBottom: '6px' }}>
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '13px', fontWeight: '800', color: '#0f172a', marginBottom: '8px' }}>
                   Step 1: Paste Your Slack Incoming Webhook URL
                 </label>
                 <input
@@ -523,31 +544,31 @@ Summary: ${selectedFiling.summary}`}
                   placeholder="https://hooks.slack.com/services/T00/B00/XXX..."
                   value={webhookUrlInput}
                   onChange={(e) => setWebhookUrlInput(e.target.value)}
-                  style={{ width: '100%', padding: '10px 14px', borderRadius: '6px', backgroundColor: '#09090b', border: '1px solid #3f3f46', color: '#ffffff', fontFamily: 'monospace', fontSize: '12px', boxSizing: 'border-box' }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #cbd5e1', color: '#0f172a', fontFamily: 'monospace', fontSize: '13px', boxSizing: 'border-box' }}
                 />
-                <div style={{ fontSize: '11px', color: '#71717a', marginTop: '6px' }}>
-                  Need a Webhook URL? <a href="https://api.slack.com/apps" target="_blank" rel="noreferrer" style={{ color: '#38bdf8', textDecoration: 'none' }}>Open Slack App Management ↗</a>
+                <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
+                  Need a Webhook URL? <a href="https://api.slack.com/apps" target="_blank" rel="noreferrer" style={{ color: '#2563eb', textDecoration: 'none', fontWeight: '700' }}>Open Slack App Management ↗</a>
                 </div>
               </div>
 
               {slackTestStatus && (
-                <div style={{ padding: '10px 14px', borderRadius: '6px', backgroundColor: '#09090b', border: '1px solid #27272a', fontSize: '12px', color: '#f4f4f5', marginBottom: '16px', fontFamily: 'monospace' }}>
+                <div style={{ padding: '12px 16px', borderRadius: '8px', backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', fontSize: '13px', color: '#0f172a', marginBottom: '20px', fontFamily: 'monospace' }}>
                   {slackTestStatus}
                 </div>
               )}
 
-              <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ display: 'flex', gap: '12px' }}>
                 <button
                   type="submit"
                   disabled={isDispatchingTest}
-                  style={{ flex: 1, backgroundColor: '#ffffff', color: '#09090b', padding: '10px 0', borderRadius: '6px', fontWeight: '800', fontSize: '13px', border: 'none', cursor: 'pointer' }}
+                  style={{ flex: 1, backgroundColor: '#2563eb', color: '#ffffff', padding: '12px 0', borderRadius: '8px', fontWeight: '800', fontSize: '14px', border: 'none', cursor: 'pointer', transition: 'background-color 0.15s' }}
                 >
                   {isDispatchingTest ? 'Testing Connection...' : 'Connect & Test Free Slack Bot →'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsSlackModalOpen(false)}
-                  style={{ backgroundColor: '#27272a', color: '#a1a1aa', padding: '10px 16px', borderRadius: '6px', fontWeight: '700', fontSize: '13px', border: 'none', cursor: 'pointer' }}
+                  style={{ backgroundColor: '#f1f5f9', color: '#475569', padding: '12px 18px', borderRadius: '8px', fontWeight: '700', fontSize: '14px', border: 'none', cursor: 'pointer' }}
                 >
                   Close
                 </button>
@@ -558,20 +579,19 @@ Summary: ${selectedFiling.summary}`}
       )}
 
       {/* Notion Minimalist Footer */}
-      <footer style={{ backgroundColor: '#09090b', padding: '40px 24px', borderTop: '1px solid #27272a', fontSize: '13px', color: '#71717a' }}>
-        <div style={{ maxWidth: '1150px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <footer style={{ backgroundColor: '#ffffff', padding: '50px 24px', borderTop: '1px solid #e2e8f0', fontSize: '14px', color: '#64748b' }}>
+        <div style={{ maxWidth: '1180px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontWeight: '800', color: '#ffffff', fontSize: '15px', marginBottom: '4px' }}>Watchpost HQ</div>
+            <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '16px', marginBottom: '4px' }}>Watchpost HQ</div>
             <div>Sub-Second SEC EDGAR Item 1.05 &amp; 5.02 Regulatory Radar.</div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ height: '8px', width: '8px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
-            <span style={{ fontFamily: 'monospace', fontSize: '12px', color: '#4ade80' }}>SEC EDGAR Stream 100% Operational (0.42s SLA)</span>
+            <span style={{ fontFamily: 'monospace', fontSize: '13px', color: '#16a34a', fontWeight: '700' }}>SEC EDGAR Stream 100% Operational (0.42s SLA)</span>
           </div>
         </div>
       </footer>
     </div>
   );
 }
-

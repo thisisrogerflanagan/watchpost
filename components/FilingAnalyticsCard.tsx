@@ -85,7 +85,7 @@ export const FilingAnalyticsCard: React.FC<FilingAnalyticsCardProps> = ({ filing
       {/* Top Header Controls Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: '800', color: textColor, margin: 0 }}>
-          Audience &amp; SEC Filing Growth
+          Regulatory Disclosures &amp; Signal Volume Velocity
         </h2>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>

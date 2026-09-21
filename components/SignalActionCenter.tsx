@@ -232,7 +232,7 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
         padding: '20px'
       }}>
         <h3 style={{ fontSize: '14px', fontWeight: '800', color: textColor, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          👥 Target Executive Contacts &amp; Decision Makers
+          Verified Institutional Decision-Maker Pathways
         </h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -260,7 +260,7 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
                   backgroundColor: contact.emailStatus === 'verified' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
                   color: contact.emailStatus === 'verified' ? '#16a34a' : '#ca8a04'
                 }}>
-                  {contact.emailStatus === 'verified' ? '✓ EMAIL VERIFIED' : 'UNVERIFIED'}
+                  {contact.emailStatus === 'verified' ? '✓ VERIFIED PATHWAY' : 'UNVERIFIED'}
                 </span>
 
                 <a
@@ -294,15 +294,15 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
           <h3 style={{ fontSize: '14px', fontWeight: '800', color: textColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            🎯 AI Outbound Pitch Playbook
+            Strategic Outreach &amp; Incident Action Playbook
           </h3>
 
           {/* Pitch Playbook Tabs */}
           <div style={{ display: 'flex', gap: '4px', backgroundColor: highlightBg, padding: '3px', borderRadius: '6px', border: `1px solid ${borderColor}` }}>
             {[
-              { id: 'ir', label: 'IR Pitch' },
-              { id: 'vendor', label: 'Vendor Intro' },
-              { id: 'brief', label: 'Exec Brief' }
+              { id: 'ir', label: 'IR Retainer Brief' },
+              { id: 'vendor', label: 'Vendor Transition Pitch' },
+              { id: 'brief', label: 'Executive Governance Briefing' }
             ].map((tab) => (
               <button
                 key={tab.id}

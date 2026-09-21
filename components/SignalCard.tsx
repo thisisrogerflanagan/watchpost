@@ -134,7 +134,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({
           letterSpacing: '0.03em',
           textTransform: 'uppercase'
         }}>
-          {is105 ? '🚨 ITEM 1.05: MATERIAL CYBERSECURITY INCIDENT' : '👔 ITEM 5.02: C-SUITE EXECUTIVE TRANSITION'}
+          {is105 ? 'SEC ITEM 1.05: MATERIAL CYBERSECURITY DISCLOSURE' : 'SEC ITEM 5.02: EXECUTIVE LEADERSHIP TRANSITION'}
         </span>
       </div>
 

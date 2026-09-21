@@ -2,6 +2,7 @@
 
 import React from 'react';
 import posthog from 'posthog-js';
+import { CompanyAvatar } from './CompanyAvatar';
 import { FilingRecord } from '../lib/filingRepository';
 
 interface SignalCardProps {
@@ -94,21 +95,12 @@ export const SignalCard: React.FC<SignalCardProps> = ({
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           {/* Avatar Icon */}
-          <div style={{
-            width: '38px',
-            height: '38px',
-            borderRadius: '50%',
-            backgroundColor: avatarBg,
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontWeight: '800',
-            fontSize: '15px',
-            flexShrink: 0
-          }}>
-            {avatarInitial}
-          </div>
+          <CompanyAvatar
+            ticker={filing.companies?.ticker}
+            companyName={companyName}
+            size={38}
+            is105={!!is105}
+          />
 
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>

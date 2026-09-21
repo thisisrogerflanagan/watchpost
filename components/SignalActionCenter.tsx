@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import posthog from 'posthog-js';
+import { CompanyAvatar } from './CompanyAvatar';
 import { FilingRecord } from '../lib/filingRepository';
 import { generateSignalEnrichment } from '../lib/airbnbCopyGenerator';
 import { dispatchSignalAlert } from '../lib/signalAlertDispatcher';
@@ -152,11 +153,18 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
         padding: '20px'
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span style={{ fontSize: '20px', fontWeight: '900', color: textColor }}>{companyName}</span>
-              <span style={{ fontSize: '14px', color: '#2563eb', fontWeight: '700', fontFamily: 'monospace' }}>${ticker}</span>
-            </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+            <CompanyAvatar
+              ticker={filing.companies?.ticker}
+              companyName={companyName}
+              size={44}
+              is105={!!filing.item_105_flag}
+            />
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '20px', fontWeight: '900', color: textColor }}>{companyName}</span>
+                <span style={{ fontSize: '14px', color: '#2563eb', fontWeight: '700', fontFamily: 'monospace' }}>${ticker}</span>
+              </div>
             <div style={{ fontSize: '12px', color: subtextColor, marginTop: '2px' }}>
               Filed SEC 8-K • {new Date(filing.filing_date).toUTCString()}
             </div>

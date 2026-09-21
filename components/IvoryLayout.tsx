@@ -355,7 +355,7 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
               Signal Intelligence &amp; Action Center
             </h2>
             <span style={{ fontSize: '11px', color: subtextColor, backgroundColor: isDarkMode ? '#27272a' : '#e2e8f0', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
-              Tapbots Shortcuts (j/k, c, s, e, o)
+              Keyboard Shortcuts (j/k, c, s, e, o)
             </span>
           </div>
 

@@ -217,10 +217,10 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
         padding: '20px'
       }}>
         <h3 style={{ fontSize: '14px', fontWeight: '800', color: textColor, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          🏡 Airbnb Human Summary &amp; Impact Analysis
+          Executive Intelligence &amp; Material Summary
         </h3>
         <p style={{ fontSize: '14px', lineHeight: '1.6', color: textColor, margin: 0, fontWeight: '500' }}>
-          {enrichment.airbnbSummary}
+          {enrichment.executiveSummary || enrichment.airbnbSummary}
         </p>
       </div>
 

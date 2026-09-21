@@ -4,6 +4,7 @@ export interface SignalEnrichment {
   impactScore: number;
   urgencyLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM';
   airbnbSummary: string;
+  executiveSummary: string;
   scopeHighlights: string[];
   contacts: Array<{
     name: string;
@@ -65,6 +66,7 @@ export function generateSignalEnrichment(filing: FilingRecord): SignalEnrichment
   const companyName = filing.companies?.company_name || filing.title || 'The Company';
   const { impactScore, urgencyLevel } = calculateImpactScore(filing);
   const airbnbSummary = generateAirbnbSummary(filing);
+  const executiveSummary = airbnbSummary;
 
   const encodedCompany = encodeURIComponent(companyName);
 
@@ -131,6 +133,7 @@ ACTION ITEMS:
     impactScore,
     urgencyLevel,
     airbnbSummary,
+    executiveSummary,
     scopeHighlights: filing.item_105_flag
       ? ['Testing Environment Containment', 'No Active Customer Data Impact', 'Third-Party Forensics Engaged']
       : ['C-Suite Executive Transition', '90-Day Vendor Review Window', 'Board Governance Active'],

@@ -45,7 +45,8 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
 
     const matchesType = filterType === 'all' ||
       (filterType === '1.05' && f.item_105_flag) ||
-      (filterType === '5.02' && f.item_502_flag);
+      (filterType === '5.02' && f.item_502_flag) ||
+      (filterType === 'watchlist' && user?.watchlist && f.companies?.ticker && user.watchlist.map(t => t.toUpperCase()).includes(f.companies.ticker.toUpperCase()));
 
     return matchesSearch && matchesType;
   });
@@ -311,6 +312,7 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
           <div style={{ display: 'flex', gap: '8px' }}>
             {[
               { id: 'all', label: 'All Signals' },
+              ...(isLoggedIn && user?.watchlist && user.watchlist.length > 0 ? [{ id: 'watchlist', label: `⭐ My Watchlist (${user.watchlist.length})` }] : []),
               { id: '1.05', label: '🚨 Item 1.05 Breaches' },
               { id: '5.02', label: '👔 Item 5.02 Shifts' }
             ].map((filter) => (

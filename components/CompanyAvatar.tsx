@@ -77,15 +77,34 @@ export const CompanyAvatar: React.FC<CompanyAvatarProps> = ({
   size = 38,
   is105 = false,
 }) => {
-  const [imageError, setImageError] = useState(false);
-  const domain = resolveCompanyDomain(ticker, companyName);
-  const logoUrl = domain ? `https://logo.clearbit.com/${domain}` : null;
+  const [sourceIndex, setSourceIndex] = useState(0);
 
-  const displayTicker = ticker ? ticker.toUpperCase() : '';
+  const cleanTicker = ticker && !ticker.startsWith('CIK:') ? ticker.toUpperCase() : null;
+  const domain = resolveCompanyDomain(ticker, companyName);
+
+  // Build candidate logo URLs
+  const candidateUrls: string[] = [];
+
+  if (cleanTicker) {
+    candidateUrls.push(`https://financialmodelingprep.com/image-stock/${cleanTicker}.png`);
+  }
+
+  if (domain) {
+    candidateUrls.push(`https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=128`);
+    candidateUrls.push(`https://icon.horse/icon/${domain}`);
+  }
+
+  const currentLogoUrl = candidateUrls[sourceIndex] || null;
+
+  const displayTicker = cleanTicker || '';
   const avatarInitial = (displayTicker || companyName || '?').charAt(0).toUpperCase();
   const avatarBg = is105 ? '#dc2626' : '#2563eb';
 
-  if (logoUrl && !imageError) {
+  const handleImageError = () => {
+    setSourceIndex((prev) => prev + 1);
+  };
+
+  if (currentLogoUrl) {
     return (
       <div
         style={{
@@ -103,14 +122,14 @@ export const CompanyAvatar: React.FC<CompanyAvatarProps> = ({
         }}
       >
         <img
-          src={logoUrl}
+          src={currentLogoUrl}
           alt={`${companyName} logo`}
-          onError={() => setImageError(true)}
+          onError={handleImageError}
           style={{
             width: '100%',
             height: '100%',
             objectFit: 'contain',
-            padding: '2px',
+            padding: '3px',
           }}
         />
       </div>

@@ -74,7 +74,7 @@ export default function LandingPage() {
             <span style={{ backgroundColor: '#dc2626', color: '#ffffff', padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '900', letterSpacing: '0.05em' }}>
               SEC RADAR
             </span>
-            <span style={{ fontWeight: '900', fontSize: '18px', color: '#ffffff', tracking: '-0.02em' }}>
+            <span style={{ fontWeight: '900', fontSize: '18px', color: '#ffffff', letterSpacing: '-0.02em' }}>
               Watchpost HQ
             </span>
           </div>
@@ -208,7 +208,7 @@ export default function LandingPage() {
 
               {/* Right Column: Executive Brief Preview */}
               <div style={{ padding: '24px', backgroundColor: '#09090b' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #27272a', pb: '10px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', borderBottom: '1px solid #27272a', paddingBottom: '10px' }}>
                   <span style={{ fontSize: '11px', fontFamily: 'monospace', fontWeight: '800', color: '#a1a1aa' }}>EXECUTIVE BRIEF PREVIEW</span>
                   <span style={{ fontSize: '11px', color: '#4ade80', fontWeight: '700', fontFamily: 'monospace' }}>✓ VERIFIED EDGAR DISCLOSURE</span>
                 </div>

@@ -31,6 +31,31 @@ export interface IngestionResult {
   savedCount: number;
 }
 
+export function cleanSummaryText(rawText: string): string {
+  if (!rawText) return '';
+
+  // 1. Decode HTML Entities
+  let text = rawText
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+
+  // 2. Strip EDGAR Atom header metadata block
+  text = text.replace(/<b>Filed:<\/b>.*?<b>Size:<\/b>.*?(?:<br\s*\/?>|$)/gi, '');
+  text = text.replace(/Filed:.*?AccNo:.*?Size:.*?(?:<br\s*\/?>|$)/gi, '');
+
+  // 3. Remove HTML tags
+  text = text.replace(/<br\s*\/?>/gi, ' ').replace(/<\/?[^>]+(>|$)/g, ' ');
+
+  // 4. Collapse whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+
+  return text;
+}
+
 export class SECFeedIngestionEngine {
   private xmlParser: XMLParser;
 
@@ -44,7 +69,6 @@ export class SECFeedIngestionEngine {
   public parseXmlFeed(xmlContent: string): ParsedFilingSignal[] {
     const extractedSignals: ParsedFilingSignal[] = [];
 
-    // Strategy 1: Attempt structured XML parsing with fast-xml-parser
     try {
       const parsedXml = this.xmlParser.parse(xmlContent);
       const entries = Array.isArray(parsedXml.feed?.entry)
@@ -69,7 +93,6 @@ export class SECFeedIngestionEngine {
         }
       }
     } catch {
-      // Strategy 2: Fallback string splitting for raw entry blocks
       const entryBlocks = xmlContent.split('<entry>').slice(1);
       for (const block of entryBlocks) {
         const entryXml = block.split('</entry>')[0];
@@ -124,6 +147,8 @@ export class SECFeedIngestionEngine {
     const companyNameMatch = title.match(/8-K\s+-\s+(.*?)\s+\(\d{10}\)/);
     const companyName = companyNameMatch ? companyNameMatch[1].trim() : 'Unknown Filer';
 
+    const cleanedSummary = cleanSummaryText(summary);
+
     return {
       accessionNumber,
       cik,
@@ -133,7 +158,7 @@ export class SECFeedIngestionEngine {
       isItem105,
       isItem502,
       filingUrl: href || `https://www.sec.gov/edgar/browse/?CIK=${cik}`,
-      summaryText: summary
+      summaryText: cleanedSummary || summary
     };
   }
 

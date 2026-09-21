@@ -9,6 +9,22 @@ interface SignalCardProps {
   isDarkMode?: boolean;
 }
 
+function cleanSummaryText(rawText: string): string {
+  if (!rawText) return '';
+  let text = rawText
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+
+  text = text.replace(/<b>Filed:<\/b>.*?<b>Size:<\/b>.*?(?:<br\s*\/?>|$)/gi, '');
+  text = text.replace(/Filed:.*?AccNo:.*?Size:.*?(?:<br\s*\/?>|$)/gi, '');
+  text = text.replace(/<br\s*\/?>/gi, ' ').replace(/<\/?[^>]+(>|$)/g, ' ');
+  return text.replace(/\s+/g, ' ').trim();
+}
+
 export const SignalCard: React.FC<SignalCardProps> = ({ filing, isDarkMode = false }) => {
   const is105 = filing.item_105_flag;
   const ticker = filing.companies?.ticker ? filing.companies.ticker.toUpperCase() : `CIK:${filing.cik}`;
@@ -43,6 +59,8 @@ export const SignalCard: React.FC<SignalCardProps> = ({ filing, isDarkMode = fal
   const handleSecClick = () => {
     posthog.capture('sec_file_opened', { ticker, url: filing.raw_html_url });
   };
+
+  const formattedSummary = cleanSummaryText(filing.summary_text);
 
   return (
     <article style={{
@@ -121,7 +139,7 @@ export const SignalCard: React.FC<SignalCardProps> = ({ filing, isDarkMode = fal
         color: textColor,
         marginBottom: '16px'
       }}>
-        {filing.summary_text}
+        {formattedSummary}
       </div>
 
       {/* Action Footer Buttons */}

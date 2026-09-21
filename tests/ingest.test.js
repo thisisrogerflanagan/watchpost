@@ -2,11 +2,23 @@ const test = require('node:test');
 const assert = require('node:assert');
 const fs = require('fs');
 const path = require('path');
-const { SECFeedIngestionEngine, SEC_HEADERS } = require('../lib/secFeedIngestionEngine');
+const { SECFeedIngestionEngine, SEC_HEADERS, cleanSummaryText } = require('../lib/secFeedIngestionEngine');
 
 test('SEC User-Agent Header Compliance', () => {
   assert.ok(SEC_HEADERS['User-Agent'].includes('contact@watchposthq.com'));
   assert.strictEqual(SEC_HEADERS['User-Agent'].includes('axios'), false);
+});
+
+test('Clean HTML entities and EDGAR metadata header from summary text', () => {
+  const dirty = '&lt;b&gt;Filed:&lt;/b&gt; 2026-09-18 &lt;b&gt;AccNo:&lt;/b&gt; 0001069202-26-000091 &lt;b&gt;Size:&lt;/b&gt; 256 KB &lt;br&gt;Item 5.02: Departure of Directors or Certain Officers; Election of Directors &lt;br&gt;Item 9.01: Financial Statements and Exhibits';
+  const cleaned = cleanSummaryText(dirty);
+  
+  assert.strictEqual(cleaned.includes('&lt;b&gt;'), false);
+  assert.strictEqual(cleaned.includes('Filed:'), false);
+  assert.strictEqual(cleaned.includes('AccNo:'), false);
+  assert.strictEqual(cleaned.includes('Size:'), false);
+  assert.ok(cleaned.includes('Item 5.02: Departure of Directors or Certain Officers'));
+  assert.ok(cleaned.includes('Item 9.01: Financial Statements and Exhibits'));
 });
 
 test('Parse Item 1.05 Material Cybersecurity Incident from XML Feed', () => {

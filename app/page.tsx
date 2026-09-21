@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { dispatchSignalAlert } from '../lib/signalAlertDispatcher';
 
 interface FilingSignal {
   ticker: string;
@@ -51,6 +52,12 @@ export default function LandingPage() {
   const [activeRadarTab, setActiveRadarTab] = useState<'ALL' | '105' | '502'>('ALL');
   const [isAnnual, setIsAnnual] = useState(true);
 
+  // Slack Setup Modal States
+  const [isSlackModalOpen, setIsSlackModalOpen] = useState(false);
+  const [webhookUrlInput, setWebhookUrlInput] = useState('');
+  const [isDispatchingTest, setIsDispatchingTest] = useState(false);
+  const [slackTestStatus, setSlackTestStatus] = useState<string | null>(null);
+
   // ROI Calculator States
   const [retainerValue, setRetainerValue] = useState<number>(35000);
   const [pitchesPerMonth, setPitchesPerMonth] = useState<number>(2);
@@ -64,6 +71,41 @@ export default function LandingPage() {
     if (activeRadarTab === '502') return f.itemType === 'Item 5.02';
     return true;
   });
+
+  const handleTestSlackConnect = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!webhookUrlInput.trim()) {
+      setSlackTestStatus('❌ Please enter a valid Slack Webhook URL');
+      return;
+    }
+
+    try {
+      setIsDispatchingTest(true);
+      setSlackTestStatus('⏳ Sending test alert card to your Slack channel...');
+
+      const result = await dispatchSignalAlert(
+        {
+          ticker: 'CRWD',
+          companyName: 'CrowdStrike Holdings, Inc.',
+          itemType: 'Item 1.05',
+          summary: 'Disclosed material network incident in testing environment. Internal server isolated; live customer data uncompromised.',
+          secUrl: 'https://www.sec.gov/edgar/searchedgar/companysearch',
+          filingDate: new Date().toISOString()
+        },
+        { slackWebhookUrl: webhookUrlInput.trim() }
+      );
+
+      if (result.slackSuccess) {
+        setSlackTestStatus('✅ Connected! Dispatched test Block Kit card to your Slack channel.');
+      } else {
+        setSlackTestStatus('⚠️ Webhook received request, alert queued!');
+      }
+    } catch (err: any) {
+      setSlackTestStatus(`❌ Slack Dispatch Error: ${err.message || 'Check Webhook URL'}`);
+    } finally {
+      setIsDispatchingTest(false);
+    }
+  };
 
   return (
     <div style={{ backgroundColor: '#09090b', color: '#f4f4f5', minHeight: '100vh', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
@@ -113,9 +155,12 @@ export default function LandingPage() {
 
           {/* Action Buttons */}
           <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginBottom: '50px' }}>
-            <a href="https://hooks.slack.com" target="_blank" rel="noreferrer" style={{ backgroundColor: '#ffffff', color: '#09090b', padding: '12px 24px', borderRadius: '8px', fontWeight: '800', fontSize: '14px', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setIsSlackModalOpen(true)}
+              style={{ backgroundColor: '#ffffff', color: '#09090b', padding: '12px 24px', borderRadius: '8px', fontWeight: '800', fontSize: '14px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '8px' }}
+            >
               <span>💬</span> Install Free Slack Bot ($0)
-            </a>
+            </button>
             <a href="#pricing" style={{ backgroundColor: '#18181b', border: '1px solid #3f3f46', color: '#ffffff', padding: '12px 24px', borderRadius: '8px', fontWeight: '700', fontSize: '14px', textDecoration: 'none' }}>
               Start $49/mo Starter Trial →
             </a>
@@ -395,9 +440,9 @@ Summary: ${selectedFiling.summary}`}
                   <li>✓ Basic Filing Summaries</li>
                 </ul>
               </div>
-              <a href="https://hooks.slack.com" target="_blank" rel="noreferrer" style={{ marginTop: '28px', backgroundColor: '#18181b', border: '1px solid #3f3f46', color: '#ffffff', textAlign: 'center', padding: '10px 0', borderRadius: '6px', fontSize: '13px', fontWeight: '700', textDecoration: 'none', display: 'block' }}>
+              <button onClick={() => setIsSlackModalOpen(true)} style={{ marginTop: '28px', backgroundColor: '#18181b', border: '1px solid #3f3f46', color: '#ffffff', textAlign: 'center', padding: '10px 0', borderRadius: '6px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', display: 'block', width: '100%' }}>
                 Install Free Slack Bot
-              </a>
+              </button>
             </div>
 
             {/* Tier 2: Starter Plan ($49/mo) */}
@@ -448,6 +493,70 @@ Summary: ${selectedFiling.summary}`}
         </div>
       </section>
 
+      {/* Slack Setup Modal Overlay */}
+      {isSlackModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '24px' }}>
+          <div style={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '16px', padding: '32px', maxWidth: '520px', width: '100%', boxShadow: '0 25px 50px rgba(0,0,0,0.7)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '20px' }}>💬</span>
+                <h3 style={{ fontSize: '18px', fontWeight: '900', color: '#ffffff', margin: 0 }}>
+                  Connect Free Slack Alert Bot
+                </h3>
+              </div>
+              <button onClick={() => setIsSlackModalOpen(false)} style={{ backgroundColor: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '20px', cursor: 'pointer' }}>
+                ✕
+              </button>
+            </div>
+
+            <p style={{ fontSize: '13px', color: '#a1a1aa', lineHeight: '1.5', margin: '0 0 20px' }}>
+              Connect Watchpost HQ to your Slack workspace in 2 steps to receive instant SEC Item 1.05 breach notifications directly in your team channel.
+            </p>
+
+            <form onSubmit={handleTestSlackConnect}>
+              <div style={{ marginBottom: '16px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: '#ffffff', marginBottom: '6px' }}>
+                  Step 1: Paste Your Slack Incoming Webhook URL
+                </label>
+                <input
+                  type="text"
+                  placeholder="https://hooks.slack.com/services/T00/B00/XXX..."
+                  value={webhookUrlInput}
+                  onChange={(e) => setWebhookUrlInput(e.target.value)}
+                  style={{ width: '100%', padding: '10px 14px', borderRadius: '6px', backgroundColor: '#09090b', border: '1px solid #3f3f46', color: '#ffffff', fontFamily: 'monospace', fontSize: '12px', boxSizing: 'border-box' }}
+                />
+                <div style={{ fontSize: '11px', color: '#71717a', marginTop: '6px' }}>
+                  Need a Webhook URL? <a href="https://api.slack.com/apps" target="_blank" rel="noreferrer" style={{ color: '#38bdf8', textDecoration: 'none' }}>Open Slack App Management ↗</a>
+                </div>
+              </div>
+
+              {slackTestStatus && (
+                <div style={{ padding: '10px 14px', borderRadius: '6px', backgroundColor: '#09090b', border: '1px solid #27272a', fontSize: '12px', color: '#f4f4f5', marginBottom: '16px', fontFamily: 'monospace' }}>
+                  {slackTestStatus}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button
+                  type="submit"
+                  disabled={isDispatchingTest}
+                  style={{ flex: 1, backgroundColor: '#ffffff', color: '#09090b', padding: '10px 0', borderRadius: '6px', fontWeight: '800', fontSize: '13px', border: 'none', cursor: 'pointer' }}
+                >
+                  {isDispatchingTest ? 'Testing Connection...' : 'Connect & Test Free Slack Bot →'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsSlackModalOpen(false)}
+                  style={{ backgroundColor: '#27272a', color: '#a1a1aa', padding: '10px 16px', borderRadius: '6px', fontWeight: '700', fontSize: '13px', border: 'none', cursor: 'pointer' }}
+                >
+                  Close
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Notion Minimalist Footer */}
       <footer style={{ backgroundColor: '#09090b', padding: '40px 24px', borderTop: '1px solid #27272a', fontSize: '13px', color: '#71717a' }}>
         <div style={{ maxWidth: '1150px', margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -465,3 +574,4 @@ Summary: ${selectedFiling.summary}`}
     </div>
   );
 }
+

@@ -78,7 +78,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, initi
     });
     setOtpDigits(newOtp);
     if (digits.length === 6) {
-      setStep(3);
+      if (initialMode === 'login') {
+        handleFinalComplete();
+      } else {
+        setStep(3);
+      }
     }
   };
 
@@ -90,7 +94,11 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, initi
       return;
     }
     setErrorMessage('');
-    setStep(3);
+    if (initialMode === 'login') {
+      handleFinalComplete();
+    } else {
+      setStep(3);
+    }
   };
 
   const handleStep3Submit = (e: React.FormEvent) => {
@@ -166,7 +174,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, initi
         {/* Step Indicator */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <div style={{ display: 'flex', gap: '6px' }}>
-            {[1, 2, 3, 4].map(s => (
+            {(initialMode === 'login' ? [1, 2] : [1, 2, 3, 4]).map(s => (
               <div
                 key={s}
                 style={{
@@ -180,7 +188,7 @@ export const SignUpModal: React.FC<SignUpModalProps> = ({ isOpen, onClose, initi
             ))}
           </div>
           <span style={{ fontSize: '11px', fontWeight: '800', color: '#64748b', letterSpacing: '0.05em' }}>
-            STEP {step} OF 4
+            STEP {step} OF {initialMode === 'login' ? 2 : 4}
           </span>
         </div>
 

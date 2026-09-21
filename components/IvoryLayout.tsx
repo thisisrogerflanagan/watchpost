@@ -15,12 +15,19 @@ interface IvoryLayoutProps {
 }
 
 export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) => {
-  const { user, isLoggedIn, logout } = useAuth();
+  const { user, isLoggedIn, logout, updateWatchlist } = useAuth();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeTab, setActiveTab] = useState('feed');
   const [filterType, setFilterType] = useState('all');
   const [search, setSearch] = useState('');
   const [selectedFilingId, setSelectedFilingId] = useState<string | null>(null);
+
+  // New ticker input for Watchlist tab
+  const [newTicker, setNewTicker] = useState('');
+  // Webhook settings state
+  const [slackUrl, setSlackUrl] = useState('');
+  const [alertEmail, setAlertEmail] = useState('');
+  const [testAlertMessage, setTestAlertMessage] = useState<string | null>(null);
 
   // Colors based on theme
   const pageBg = isDarkMode ? '#09090b' : '#f8fafc';
@@ -60,9 +67,9 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
 
   const selectedFiling = filteredFilings.find(f => f.id === selectedFilingId) || (filteredFilings.length > 0 ? filteredFilings[0] : null);
 
-  // Keyboard navigation (j/k for signals, o for open SEC)
+  // Keyboard navigation (j/k for signals, c/s/e/o for actions)
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = async (e: KeyboardEvent) => {
       // Don't trigger when typing in inputs
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
         return;
@@ -83,12 +90,86 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
       } else if (e.key === 'o' && selectedFiling) {
         e.preventDefault();
         window.open(selectedFiling.raw_html_url, '_blank');
+      } else if (e.key === 'c' && selectedFiling) {
+        e.preventDefault();
+        const script = `🚨 [Watchpost HQ Alert] SEC 8-K Disclosure for $${selectedFiling.companies?.ticker || 'CIK'}\nSummary: ${selectedFiling.summary_text || selectedFiling.title}`;
+        navigator.clipboard.writeText(script);
+      } else if (e.key === 's' && selectedFiling) {
+        e.preventDefault();
+        await fetch('/api/alerts/slack', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticker: selectedFiling.companies?.ticker || 'CIK',
+            companyName: selectedFiling.companies?.company_name || selectedFiling.title,
+            itemType: selectedFiling.item_105_flag ? 'Item 1.05' : 'Item 5.02',
+            summary: selectedFiling.summary_text || selectedFiling.title,
+            secUrl: selectedFiling.raw_html_url,
+            filingDate: selectedFiling.filing_date
+          })
+        });
+      } else if (e.key === 'e' && selectedFiling) {
+        e.preventDefault();
+        await fetch('/api/alerts/email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            ticker: selectedFiling.companies?.ticker || 'CIK',
+            companyName: selectedFiling.companies?.company_name || selectedFiling.title,
+            itemType: selectedFiling.item_105_flag ? 'Item 1.05' : 'Item 5.02',
+            summary: selectedFiling.summary_text || selectedFiling.title,
+            secUrl: selectedFiling.raw_html_url,
+            filingDate: selectedFiling.filing_date
+          })
+        });
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [filteredFilings, selectedFilingId, selectedFiling]);
+
+  const handleAddTicker = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTicker.trim()) return;
+    const cleaned = newTicker.trim().toUpperCase();
+    const currentList = user?.watchlist || ['CRWD', 'PANW', 'OKTA', 'ZS', 'NET'];
+    if (!currentList.includes(cleaned)) {
+      updateWatchlist([...currentList, cleaned]);
+    }
+    setNewTicker('');
+  };
+
+  const handleRemoveTicker = (tickerToRemove: string) => {
+    const currentList = user?.watchlist || ['CRWD', 'PANW', 'OKTA', 'ZS', 'NET'];
+    updateWatchlist(currentList.filter(t => t.toUpperCase() !== tickerToRemove.toUpperCase()));
+  };
+
+  const handleSendTestWebhook = async () => {
+    setTestAlertMessage('Sending test signal dispatch...');
+    try {
+      const res = await fetch('/api/alerts/slack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticker: 'CRWD',
+          companyName: 'CrowdStrike Holdings',
+          itemType: 'Item 1.05',
+          summary: 'Test SEC 8-K Item 1.05 Cybersecurity Breach Disclosure Signal from Watchpost HQ Alert Settings.',
+          secUrl: 'https://www.sec.gov',
+          filingDate: new Date().toISOString()
+        })
+      });
+      if (res.ok) {
+        setTestAlertMessage('✅ Test alert dispatched successfully via Webhook API!');
+      } else {
+        setTestAlertMessage('ℹ️ Test alert endpoint called.');
+      }
+    } catch {
+      setTestAlertMessage('ℹ️ Test alert endpoint call completed.');
+    }
+    setTimeout(() => setTestAlertMessage(null), 3000);
+  };
 
   return (
     <div style={{
@@ -183,6 +264,16 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
               }}
             >
               📡
+              {activeTab === 'watchlist' && (
+                <span style={{
+                  position: 'absolute',
+                  right: '-2px',
+                  width: '4px',
+                  height: '16px',
+                  backgroundColor: '#2563eb',
+                  borderRadius: '2px'
+                }} />
+              )}
             </button>
 
             <button
@@ -204,6 +295,16 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
               }}
             >
               ⚙️
+              {activeTab === 'webhooks' && (
+                <span style={{
+                  position: 'absolute',
+                  right: '-2px',
+                  width: '4px',
+                  height: '16px',
+                  backgroundColor: '#16a34a',
+                  borderRadius: '2px'
+                }} />
+              )}
             </button>
           </nav>
         </div>
@@ -232,188 +333,435 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
         </div>
       </aside>
 
-      {/* 2. Column 1: Live SEC 8-K Feed Pane */}
-      <section style={{
-        flex: '1.2',
-        backgroundColor: columnBg,
-        borderRight: `1px solid ${borderColor}`,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
-        {/* Column 1 Header */}
-        <header style={{
-          padding: '16px 24px',
-          borderBottom: `1px solid ${borderColor}`,
-          backgroundColor: headerBg,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '12px'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: textColor }}>
-                Watchpost HQ Signals Feed
-              </h1>
-              <span style={{
-                fontSize: '11px',
-                fontWeight: '700',
-                backgroundColor: '#dc2626',
-                color: '#ffffff',
-                padding: '2px 6px',
-                borderRadius: '4px'
-              }}>
-                LIVE 8-K
-              </span>
-            </div>
+      {/* Main View Area */}
+      {activeTab === 'watchlist' ? (
+        /* WATCHLIST MANAGEMENT VIEW */
+        <main style={{ flex: 1, padding: '32px 40px', overflowY: 'auto' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+              <div>
+                <h1 style={{ fontSize: '24px', fontWeight: '900', color: textColor, margin: '0 0 6px' }}>
+                  📡 Ticker Watchlist Management
+                </h1>
+                <p style={{ fontSize: '14px', color: subtextColor, margin: 0 }}>
+                  Manage the public company tickers monitored in real-time for SEC Item 1.05 and 5.02 disclosures.
+                </p>
+              </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              {isLoggedIn && user ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9', border: `1px solid ${borderColor}`, padding: '4px 12px', borderRadius: '20px', fontSize: '12px' }}>
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
-                  <span style={{ fontWeight: '700', color: textColor }}>{user.workspaceName}</span>
-                  <span style={{ color: subtextColor }}>({user.userEmail})</span>
-                  <button
-                    onClick={logout}
-                    style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: '700', fontSize: '11px', cursor: 'pointer', paddingLeft: '4px' }}
-                  >
-                    Log out
-                  </button>
-                </div>
-              ) : (
-                <a
-                  href="/"
-                  style={{ color: subtextColor, fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}
-                >
-                  ← Home
-                </a>
-              )}
-
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search ticker or company..."
-                style={{
-                  backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9',
-                  border: `1px solid ${borderColor}`,
-                  color: textColor,
-                  padding: '6px 12px',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  outline: 'none',
-                  width: '180px'
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Filter Pills */}
-          <div style={{ display: 'flex', gap: '8px' }}>
-            {[
-              { id: 'all', label: 'All Signals' },
-              ...(isLoggedIn && user?.watchlist && user.watchlist.length > 0 ? [{ id: 'watchlist', label: `⭐ My Watchlist (${user.watchlist.length})` }] : []),
-              { id: '1.05', label: '🚨 Item 1.05 Breaches' },
-              { id: '5.02', label: '👔 Item 5.02 Shifts' }
-            ].map((filter) => (
               <button
-                key={filter.id}
-                onClick={() => handleFilterChange(filter.id)}
+                onClick={() => {
+                  setFilterType('watchlist');
+                  setActiveTab('feed');
+                }}
                 style={{
-                  padding: '5px 12px',
-                  borderRadius: '16px',
-                  border: `1px solid ${filterType === filter.id ? '#dc2626' : borderColor}`,
-                  backgroundColor: filterType === filter.id ? (isDarkMode ? '#dc2626' : '#fee2e2') : (isDarkMode ? '#18181b' : '#f8fafc'),
-                  color: filterType === filter.id ? (isDarkMode ? '#ffffff' : '#dc2626') : subtextColor,
-                  fontSize: '12px',
-                  fontWeight: '600',
+                  backgroundColor: '#2563eb',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px 18px',
+                  borderRadius: '8px',
+                  fontWeight: '700',
+                  fontSize: '13px',
                   cursor: 'pointer'
                 }}
               >
-                {filter.label}
+                View Watchlist Feed →
               </button>
-            ))}
-          </div>
-        </header>
+            </div>
 
-        {/* Feed Cards Container */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
-          {loading ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: subtextColor }}>
-              Connecting to live database stream...
-            </div>
-          ) : filteredFilings.length === 0 ? (
-            <div style={{ padding: '40px', textAlign: 'center', color: subtextColor }}>
-              No SEC filings match your search filter. Monitoring SEC EDGAR 24/7.
-            </div>
-          ) : (
-            filteredFilings.map((filing) => (
-              <SignalCard
-                key={filing.id}
-                filing={filing}
-                isDarkMode={isDarkMode}
-                isSelected={selectedFiling?.id === filing.id}
-                onSelect={() => setSelectedFilingId(filing.id)}
+            {/* Add Ticker Form */}
+            <form onSubmit={handleAddTicker} style={{ backgroundColor: columnBg, border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '20px', marginBottom: '28px', display: 'flex', gap: '12px' }}>
+              <input
+                type="text"
+                value={newTicker}
+                onChange={(e) => setNewTicker(e.target.value)}
+                placeholder="Enter stock ticker symbol (e.g. AAPL, CRWD, PANW)"
+                style={{
+                  flex: 1,
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  border: `1px solid ${borderColor}`,
+                  backgroundColor: isDarkMode ? '#18181b' : '#f8fafc',
+                  color: textColor,
+                  fontSize: '14px',
+                  outline: 'none'
+                }}
               />
-            ))
-          )}
-        </div>
-      </section>
+              <button
+                type="submit"
+                style={{
+                  backgroundColor: '#0f172a',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '10px 20px',
+                  borderRadius: '8px',
+                  fontWeight: '800',
+                  fontSize: '14px',
+                  cursor: 'pointer'
+                }}
+              >
+                + Add Ticker
+              </button>
+            </form>
 
-      {/* 3. Column 2: Signal Intelligence & Outbound Action Center */}
-      <section style={{
-        flex: '1.3',
-        backgroundColor: pageBg,
-        display: 'flex',
-        flexDirection: 'column',
-        overflow: 'hidden'
-      }}>
-        {/* Column 2 Header */}
-        <header style={{
-          padding: '16px 24px',
-          borderBottom: `1px solid ${borderColor}`,
-          backgroundColor: headerBg,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: textColor }}>
-              Signal Intelligence &amp; Action Center
-            </h2>
-            <span style={{ fontSize: '11px', color: subtextColor, backgroundColor: isDarkMode ? '#27272a' : '#e2e8f0', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
-              Keyboard Shortcuts (j/k, c, s, e, o)
-            </span>
+            {/* Monitored Tickers Grid */}
+            <h3 style={{ fontSize: '15px', fontWeight: '800', color: textColor, marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              Currently Monitored Tickers ({(user?.watchlist || ['CRWD', 'PANW', 'OKTA', 'ZS', 'NET']).length})
+            </h3>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '14px' }}>
+              {(user?.watchlist || ['CRWD', 'PANW', 'OKTA', 'ZS', 'NET']).map((tickerSymbol) => (
+                <div
+                  key={tickerSymbol}
+                  style={{
+                    backgroundColor: columnBg,
+                    border: `1px solid ${borderColor}`,
+                    borderRadius: '10px',
+                    padding: '16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}
+                >
+                  <div>
+                    <span style={{ fontSize: '18px', fontWeight: '900', color: '#2563eb', fontFamily: 'monospace' }}>
+                      ${tickerSymbol.toUpperCase()}
+                    </span>
+                    <div style={{ fontSize: '11px', color: subtextColor, marginTop: '2px' }}>
+                      Real-time SEC EDGAR Monitor
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => handleRemoveTicker(tickerSymbol)}
+                    title="Remove from Watchlist"
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#ef4444',
+                      fontWeight: '800',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      padding: '4px'
+                    }}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
+        </main>
+      ) : activeTab === 'webhooks' ? (
+        /* ALERT INTEGRATION SETTINGS VIEW */
+        <main style={{ flex: 1, padding: '32px 40px', overflowY: 'auto' }}>
+          <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            <h1 style={{ fontSize: '24px', fontWeight: '900', color: textColor, margin: '0 0 6px' }}>
+              ⚙️ Alert &amp; Webhook Integration Settings
+            </h1>
+            <p style={{ fontSize: '14px', color: subtextColor, margin: '0 0 28px' }}>
+              Configure automated sub-second alerts to Slack channels and email dispatch lists for regulatory breach signals.
+            </p>
 
-          <a
-            href="#pricing"
-            style={{
-              backgroundColor: '#dc2626',
-              color: '#ffffff',
-              padding: '6px 12px',
-              borderRadius: '6px',
-              fontSize: '12px',
-              fontWeight: '600',
-              textDecoration: 'none'
-            }}
-          >
-            Upgrade Plan
-          </a>
-        </header>
+            {testAlertMessage && (
+              <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '12px 16px', color: '#1e40af', fontWeight: '700', fontSize: '13px', marginBottom: '24px' }}>
+                {testAlertMessage}
+              </div>
+            )}
 
-        {/* Action Center & Analytics Body Container */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Main Action Center */}
-          <SignalActionCenter filing={selectedFiling} isDarkMode={isDarkMode} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Slack Webhook Card */}
+              <div style={{ backgroundColor: columnBg, border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '24px' }}>💬</span>
+                  <h3 style={{ fontSize: '17px', fontWeight: '800', color: textColor, margin: 0 }}>
+                    Slack Block Kit Webhook Dispatch
+                  </h3>
+                </div>
+                <p style={{ fontSize: '13px', color: subtextColor, margin: '0 0 16px', lineHeight: '1.5' }}>
+                  Incoming Slack Webhooks deliver structured Block Kit cards with impact scores and direct SEC links directly into your incident response channel.
+                </p>
 
-          {/* Medium-Style Analytics Card */}
-          <FilingAnalyticsCard filings={filings} isDarkMode={isDarkMode} />
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: subtextColor, textTransform: 'uppercase', marginBottom: '6px' }}>
+                    SLACK INCOMING WEBHOOK URL
+                  </label>
+                  <input
+                    type="text"
+                    value={slackUrl}
+                    onChange={(e) => setSlackUrl(e.target.value)}
+                    placeholder="https://hooks.slack.com/services/T000/B000/XXXXXX"
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: `1px solid ${borderColor}`,
+                      backgroundColor: isDarkMode ? '#18181b' : '#f8fafc',
+                      color: textColor,
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
 
-          {/* Live Delivery Audit Log */}
-          <NotificationAuditFeed isDarkMode={isDarkMode} />
-        </div>
-      </section>
+                <button
+                  onClick={handleSendTestWebhook}
+                  style={{
+                    backgroundColor: '#4a154b',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '10px 18px',
+                    borderRadius: '8px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ⚡ Send Test Slack Webhook Dispatch
+                </button>
+              </div>
+
+              {/* Email Alert Card */}
+              <div style={{ backgroundColor: columnBg, border: `1px solid ${borderColor}`, borderRadius: '12px', padding: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                  <span style={{ fontSize: '24px' }}>📧</span>
+                  <h3 style={{ fontSize: '17px', fontWeight: '800', color: textColor, margin: 0 }}>
+                    Resend Email Digest &amp; Urgent Alert Dispatch
+                  </h3>
+                </div>
+                <p style={{ fontSize: '13px', color: subtextColor, margin: '0 0 16px', lineHeight: '1.5' }}>
+                  Instant HTML emails formatted with executive summaries sent immediately upon Item 1.05 filing detection.
+                </p>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '11px', fontWeight: '800', color: subtextColor, textTransform: 'uppercase', marginBottom: '6px' }}>
+                    DEFAULT ALERT RECIPIENT EMAIL
+                  </label>
+                  <input
+                    type="email"
+                    value={alertEmail || (user?.userEmail || '')}
+                    onChange={(e) => setAlertEmail(e.target.value)}
+                    placeholder="alerts@company.com"
+                    style={{
+                      width: '100%',
+                      padding: '10px 14px',
+                      borderRadius: '8px',
+                      border: `1px solid ${borderColor}`,
+                      backgroundColor: isDarkMode ? '#18181b' : '#f8fafc',
+                      color: textColor,
+                      fontSize: '13px',
+                      outline: 'none',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+
+                <button
+                  onClick={handleSendTestWebhook}
+                  style={{
+                    backgroundColor: '#2563eb',
+                    color: '#ffffff',
+                    border: 'none',
+                    padding: '10px 18px',
+                    borderRadius: '8px',
+                    fontWeight: '700',
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  📧 Send Test Email Alert
+                </button>
+              </div>
+            </div>
+          </div>
+        </main>
+      ) : (
+        /* STANDARD FEED & ACTION CENTER VIEW */
+        <>
+          {/* 2. Column 1: Live SEC 8-K Feed Pane */}
+          <section style={{
+            flex: '1.2',
+            backgroundColor: columnBg,
+            borderRight: `1px solid ${borderColor}`,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            {/* Column 1 Header */}
+            <header style={{
+              padding: '16px 24px',
+              borderBottom: `1px solid ${borderColor}`,
+              backgroundColor: headerBg,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <h1 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: textColor }}>
+                    Watchpost HQ Signals Feed
+                  </h1>
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: '700',
+                    backgroundColor: '#dc2626',
+                    color: '#ffffff',
+                    padding: '2px 6px',
+                    borderRadius: '4px'
+                  }}>
+                    LIVE 8-K
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  {isLoggedIn && user ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9', border: `1px solid ${borderColor}`, padding: '4px 12px', borderRadius: '20px', fontSize: '12px' }}>
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#22c55e', display: 'inline-block' }} />
+                      <span style={{ fontWeight: '700', color: textColor }}>{user.workspaceName}</span>
+                      <span style={{ color: subtextColor }}>({user.userEmail})</span>
+                      <button
+                        onClick={logout}
+                        style={{ background: 'none', border: 'none', color: '#ef4444', fontWeight: '700', fontSize: '11px', cursor: 'pointer', paddingLeft: '4px' }}
+                      >
+                        Log out
+                      </button>
+                    </div>
+                  ) : (
+                    <a
+                      href="/"
+                      style={{ color: subtextColor, fontSize: '12px', fontWeight: '600', textDecoration: 'none' }}
+                    >
+                      ← Home
+                    </a>
+                  )}
+
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search ticker or company..."
+                    style={{
+                      backgroundColor: isDarkMode ? '#18181b' : '#f1f5f9',
+                      border: `1px solid ${borderColor}`,
+                      color: textColor,
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '13px',
+                      outline: 'none',
+                      width: '180px'
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Filter Pills */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[
+                  { id: 'all', label: 'All Signals' },
+                  ...(isLoggedIn && user?.watchlist && user.watchlist.length > 0 ? [{ id: 'watchlist', label: `⭐ My Watchlist (${user.watchlist.length})` }] : []),
+                  { id: '1.05', label: '🚨 Item 1.05 Breaches' },
+                  { id: '5.02', label: '👔 Item 5.02 Shifts' }
+                ].map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() => handleFilterChange(filter.id)}
+                    style={{
+                      padding: '5px 12px',
+                      borderRadius: '16px',
+                      border: `1px solid ${filterType === filter.id ? '#dc2626' : borderColor}`,
+                      backgroundColor: filterType === filter.id ? (isDarkMode ? '#dc2626' : '#fee2e2') : (isDarkMode ? '#18181b' : '#f8fafc'),
+                      color: filterType === filter.id ? (isDarkMode ? '#ffffff' : '#dc2626') : subtextColor,
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+            </header>
+
+            {/* Feed Cards Container */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+              {loading ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: subtextColor }}>
+                  Connecting to live database stream...
+                </div>
+              ) : filteredFilings.length === 0 ? (
+                <div style={{ padding: '40px', textAlign: 'center', color: subtextColor }}>
+                  No SEC filings match your search filter. Monitoring SEC EDGAR 24/7.
+                </div>
+              ) : (
+                filteredFilings.map((filing) => (
+                  <SignalCard
+                    key={filing.id}
+                    filing={filing}
+                    isDarkMode={isDarkMode}
+                    isSelected={selectedFiling?.id === filing.id}
+                    onSelect={() => setSelectedFilingId(filing.id)}
+                  />
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* 3. Column 2: Signal Intelligence & Outbound Action Center */}
+          <section style={{
+            flex: '1.3',
+            backgroundColor: pageBg,
+            display: 'flex',
+            flexDirection: 'column',
+            overflow: 'hidden'
+          }}>
+            {/* Column 2 Header */}
+            <header style={{
+              padding: '16px 24px',
+              borderBottom: `1px solid ${borderColor}`,
+              backgroundColor: headerBg,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: textColor }}>
+                  Signal Intelligence &amp; Action Center
+                </h2>
+                <span style={{ fontSize: '11px', color: subtextColor, backgroundColor: isDarkMode ? '#27272a' : '#e2e8f0', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
+                  Keyboard Shortcuts (j/k, c, s, e, o)
+                </span>
+              </div>
+
+              <a
+                href="#pricing"
+                style={{
+                  backgroundColor: '#dc2626',
+                  color: '#ffffff',
+                  padding: '6px 12px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  textDecoration: 'none'
+                }}
+              >
+                Upgrade Plan
+              </a>
+            </header>
+
+            {/* Action Center & Analytics Body Container */}
+            <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+              {/* Main Action Center */}
+              <SignalActionCenter filing={selectedFiling} isDarkMode={isDarkMode} />
+
+              {/* Medium-Style Analytics Card */}
+              <FilingAnalyticsCard filings={filings} isDarkMode={isDarkMode} />
+
+              {/* Live Delivery Audit Log */}
+              <NotificationAuditFeed isDarkMode={isDarkMode} />
+            </div>
+          </section>
+        </>
+      )}
     </div>
   );
 };

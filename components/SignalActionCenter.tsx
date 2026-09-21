@@ -5,7 +5,6 @@ import posthog from 'posthog-js';
 import { CompanyAvatar } from './CompanyAvatar';
 import { FilingRecord } from '../lib/filingRepository';
 import { generateSignalEnrichment } from '../lib/airbnbCopyGenerator';
-import { dispatchSignalAlert } from '../lib/signalAlertDispatcher';
 
 interface SignalActionCenterProps {
   filing: FilingRecord | null;
@@ -69,16 +68,21 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
       setIsDispatchingSlack(true);
       posthog.capture('slack_dispatch_triggered', { ticker });
 
-      const res = await dispatchSignalAlert({
-        ticker,
-        companyName,
-        itemType: filing.item_105_flag ? 'Item 1.05' : 'Item 5.02',
-        summary: enrichment.executiveSummary,
-        secUrl: filing.raw_html_url,
-        filingDate: filing.filing_date
+      const res = await fetch('/api/alerts/slack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticker,
+          companyName,
+          itemType: filing.item_105_flag ? 'Item 1.05' : 'Item 5.02',
+          summary: enrichment.executiveSummary,
+          secUrl: filing.raw_html_url,
+          filingDate: filing.filing_date
+        })
       });
 
-      if (res.slackSuccess) {
+      const data = await res.json();
+      if (data.slackSuccess) {
         showToast(`💬 Dispatched Block Kit card for $${ticker} to Slack!`);
       } else {
         showToast(`💬 Slack notification dispatched!`);
@@ -95,16 +99,21 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
       setIsDispatchingEmail(true);
       posthog.capture('email_dispatch_triggered', { ticker });
 
-      const res = await dispatchSignalAlert({
-        ticker,
-        companyName,
-        itemType: filing.item_105_flag ? 'Item 1.05' : 'Item 5.02',
-        summary: enrichment.executiveSummary,
-        secUrl: filing.raw_html_url,
-        filingDate: filing.filing_date
+      const res = await fetch('/api/alerts/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ticker,
+          companyName,
+          itemType: filing.item_105_flag ? 'Item 1.05' : 'Item 5.02',
+          summary: enrichment.executiveSummary,
+          secUrl: filing.raw_html_url,
+          filingDate: filing.filing_date
+        })
       });
 
-      if (res.emailSuccess) {
+      const data = await res.json();
+      if (data.emailSuccess) {
         showToast(`📧 Alert email dispatched via Resend!`);
       } else {
         showToast(`📧 Alert email dispatched to subscriber!`);

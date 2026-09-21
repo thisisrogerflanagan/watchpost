@@ -5,6 +5,7 @@ import posthog from 'posthog-js';
 import { FilingRecord } from '../lib/filingRepository';
 import { SignalCard } from './SignalCard';
 import { NotificationAuditFeed } from './NotificationAuditFeed';
+import { FilingAnalyticsCard } from './FilingAnalyticsCard';
 
 interface IvoryLayoutProps {
   filings: FilingRecord[];
@@ -323,6 +324,7 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
 
         {/* Audit Feed Scrollable Body */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+          <FilingAnalyticsCard filings={filings} isDarkMode={isDarkMode} />
           <NotificationAuditFeed isDarkMode={isDarkMode} />
         </div>
       </section>

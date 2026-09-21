@@ -4,6 +4,7 @@ export interface SignalEnrichment {
   impactScore: number;
   urgencyLevel: 'CRITICAL' | 'HIGH' | 'MEDIUM';
   executiveSummary: string;
+  airbnbSummary?: string;
   scopeHighlights: string[];
   contacts: Array<{
     name: string;
@@ -131,6 +132,7 @@ STRATEGIC ACTION ITEMS:
     impactScore,
     urgencyLevel,
     executiveSummary,
+    airbnbSummary: executiveSummary,
     scopeHighlights: filing.item_105_flag
       ? ['Testing Environment Containment', 'No Active Customer Data Impact', 'Third-Party Forensics Engaged']
       : ['C-Suite Executive Transition', '90-Day Vendor Review Window', 'Board Governance Active'],

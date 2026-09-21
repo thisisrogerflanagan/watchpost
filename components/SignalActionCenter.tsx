@@ -73,7 +73,7 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
         ticker,
         companyName,
         itemType: filing.item_105_flag ? 'Item 1.05' : 'Item 5.02',
-        summary: enrichment.airbnbSummary,
+        summary: enrichment.executiveSummary,
         secUrl: filing.raw_html_url,
         filingDate: filing.filing_date
       });
@@ -99,7 +99,7 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
         ticker,
         companyName,
         itemType: filing.item_105_flag ? 'Item 1.05' : 'Item 5.02',
-        summary: enrichment.airbnbSummary,
+        summary: enrichment.executiveSummary,
         secUrl: filing.raw_html_url,
         filingDate: filing.filing_date
       });

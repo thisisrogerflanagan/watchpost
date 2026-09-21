@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import posthog from 'posthog-js';
 import { FilingRecord } from '../lib/filingRepository';
 import { SignalCard } from './SignalCard';
+import { SignalActionCenter } from './SignalActionCenter';
 import { NotificationAuditFeed } from './NotificationAuditFeed';
 import { FilingAnalyticsCard } from './FilingAnalyticsCard';
 
@@ -17,6 +18,7 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
   const [activeTab, setActiveTab] = useState('feed');
   const [filterType, setFilterType] = useState('all');
   const [search, setSearch] = useState('');
+  const [selectedFilingId, setSelectedFilingId] = useState<string | null>(null);
 
   // Colors based on theme
   const pageBg = isDarkMode ? '#09090b' : '#f8fafc';
@@ -45,6 +47,45 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
 
     return matchesSearch && matchesType;
   });
+
+  // Auto-select first filing when list loads
+  useEffect(() => {
+    if (filteredFilings.length > 0 && !selectedFilingId) {
+      setSelectedFilingId(filteredFilings[0].id);
+    }
+  }, [filteredFilings, selectedFilingId]);
+
+  const selectedFiling = filteredFilings.find(f => f.id === selectedFilingId) || (filteredFilings.length > 0 ? filteredFilings[0] : null);
+
+  // Keyboard navigation (j/k for signals, o for open SEC)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger when typing in inputs
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes((e.target as HTMLElement)?.tagName)) {
+        return;
+      }
+
+      if (filteredFilings.length === 0) return;
+
+      const currentIndex = filteredFilings.findIndex(f => f.id === selectedFilingId);
+
+      if (e.key === 'j' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        const nextIndex = Math.min(filteredFilings.length - 1, currentIndex + 1);
+        setSelectedFilingId(filteredFilings[nextIndex].id);
+      } else if (e.key === 'k' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        const prevIndex = Math.max(0, currentIndex - 1);
+        setSelectedFilingId(filteredFilings[prevIndex].id);
+      } else if (e.key === 'o' && selectedFiling) {
+        e.preventDefault();
+        window.open(selectedFiling.raw_html_url, '_blank');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [filteredFilings, selectedFilingId, selectedFiling]);
 
   return (
     <div style={{
@@ -91,7 +132,7 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <button
               onClick={() => setActiveTab('feed')}
-              title="Signals Feed"
+              title="Signals Feed (j/k)"
               style={{
                 width: '40px',
                 height: '40px',
@@ -280,15 +321,21 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
             </div>
           ) : (
             filteredFilings.map((filing) => (
-              <SignalCard key={filing.id} filing={filing} isDarkMode={isDarkMode} />
+              <SignalCard
+                key={filing.id}
+                filing={filing}
+                isDarkMode={isDarkMode}
+                isSelected={selectedFiling?.id === filing.id}
+                onSelect={() => setSelectedFilingId(filing.id)}
+              />
             ))
           )}
         </div>
       </section>
 
-      {/* 3. Column 2: Notifications & Delivery Audit Log Pane */}
+      {/* 3. Column 2: Signal Intelligence & Outbound Action Center */}
       <section style={{
-        flex: '1',
+        flex: '1.3',
         backgroundColor: pageBg,
         display: 'flex',
         flexDirection: 'column',
@@ -303,9 +350,15 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: textColor }}>
-            Notifications &amp; Activity
-          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '800', margin: 0, color: textColor }}>
+              Signal Intelligence &amp; Action Center
+            </h2>
+            <span style={{ fontSize: '11px', color: subtextColor, backgroundColor: isDarkMode ? '#27272a' : '#e2e8f0', padding: '2px 8px', borderRadius: '12px', fontWeight: '600' }}>
+              Tapbots Shortcuts (j/k, c, s, e, o)
+            </span>
+          </div>
+
           <a
             href="#pricing"
             style={{
@@ -322,9 +375,15 @@ export const IvoryLayout: React.FC<IvoryLayoutProps> = ({ filings, loading }) =>
           </a>
         </header>
 
-        {/* Audit Feed Scrollable Body */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+        {/* Action Center & Analytics Body Container */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {/* Main Action Center */}
+          <SignalActionCenter filing={selectedFiling} isDarkMode={isDarkMode} />
+
+          {/* Medium-Style Analytics Card */}
           <FilingAnalyticsCard filings={filings} isDarkMode={isDarkMode} />
+
+          {/* Live Delivery Audit Log */}
           <NotificationAuditFeed isDarkMode={isDarkMode} />
         </div>
       </section>

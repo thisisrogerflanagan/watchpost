@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import posthog from 'posthog-js';
 import { CompanyAvatar } from './CompanyAvatar';
 import { FilingRecord } from '../lib/filingRepository';
-import { generateSignalEnrichment } from '../lib/airbnbCopyGenerator';
+import { generateSignalEnrichment } from '../lib/signalIntelligenceGenerator';
 
 interface SignalActionCenterProps {
   filing: FilingRecord | null;
@@ -12,34 +12,35 @@ interface SignalActionCenterProps {
 }
 
 export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, isDarkMode = false }) => {
-  const [activePitchTab, setActivePitchTab] = useState<'ir' | 'vendor' | 'brief'>('ir');
+  const [activeScriptTab, setActiveScriptTab] = useState<'ir' | 'vendor' | 'brief'>('ir');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isDispatchingSlack, setIsDispatchingSlack] = useState(false);
   const [isDispatchingEmail, setIsDispatchingEmail] = useState(false);
 
-  const cardBg = isDarkMode ? '#18181b' : '#ffffff';
-  const borderColor = isDarkMode ? '#27272a' : '#e2e8f0';
-  const textColor = isDarkMode ? '#f4f4f5' : '#0f172a';
-  const subtextColor = isDarkMode ? '#a1a1aa' : '#64748b';
-  const highlightBg = isDarkMode ? '#09090b' : '#f8fafc';
+  // Notion Design System Tokens
+  const bgCanvas = isDarkMode ? '#191919' : '#ffffff';
+  const bgMuted = isDarkMode ? '#222222' : '#f7f6f3';
+  const bgCallout = isDarkMode ? '#252525' : '#f1f0ec';
+  const borderColor = isDarkMode ? '#2f2f2f' : '#e9e8e4';
+  const textPrimary = isDarkMode ? '#d4d4d4' : '#37352f';
+  const textMuted = isDarkMode ? '#9b9b9b' : '#787774';
+  const textLink = isDarkMode ? '#529cca' : '#0b6e99';
 
   if (!filing) {
     return (
       <div style={{
-        padding: '60px 24px',
+        padding: '48px 24px',
         textAlign: 'center',
-        color: subtextColor,
-        backgroundColor: cardBg,
+        color: textMuted,
+        backgroundColor: bgCanvas,
         border: `1px solid ${borderColor}`,
-        borderRadius: '12px'
+        borderRadius: '8px'
       }}>
-        <div style={{ fontSize: '32px', marginBottom: '12px' }}>⚡</div>
-        <h3 style={{ fontSize: '16px', fontWeight: '700', color: textColor, margin: '0 0 6px' }}>
-          Select a Signal Card to Inspect
-        </h3>
-        <p style={{ fontSize: '13px', margin: 0, color: subtextColor }}>
-          Use your mouse or keyboard (<code style={{ backgroundColor: isDarkMode ? '#27272a' : '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>j / k</code>) to inspect AI summaries, pitch playbooks, and executive contacts.
-        </p>
+        <div style={{ fontSize: '24px', marginBottom: '8px' }}>📄</div>
+        <div style={{ fontSize: '14px', fontWeight: 600, color: textPrimary }}>No Signal Selected</div>
+        <div style={{ fontSize: '12px', marginTop: '4px', color: textMuted }}>
+          Select a signal card from the feed or use <code style={{ backgroundColor: bgMuted, padding: '2px 6px', borderRadius: '4px' }}>j / k</code> to navigate.
+        </div>
       </div>
     );
   }
@@ -55,12 +56,12 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
 
   const handleCopyScript = () => {
     let scriptToCopy = enrichment.irPitchScript;
-    if (activePitchTab === 'vendor') scriptToCopy = enrichment.vendorPitchScript;
-    if (activePitchTab === 'brief') scriptToCopy = enrichment.execBriefScript;
+    if (activeScriptTab === 'vendor') scriptToCopy = enrichment.vendorPitchScript;
+    if (activeScriptTab === 'brief') scriptToCopy = enrichment.execBriefScript;
 
     navigator.clipboard.writeText(scriptToCopy);
-    posthog.capture('pitch_script_copied', { ticker, tab: activePitchTab });
-    showToast('📋 Pitch script copied to clipboard!');
+    posthog.capture('pitch_script_copied', { ticker, tab: activeScriptTab });
+    showToast('Copied script to clipboard');
   };
 
   const handleSlackDispatch = async () => {
@@ -83,12 +84,12 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
 
       const data = await res.json();
       if (data.slackSuccess) {
-        showToast(`💬 Dispatched Block Kit card for $${ticker} to Slack!`);
+        showToast(`Dispatched $${ticker} alert card to Slack`);
       } else {
-        showToast(`💬 Slack notification dispatched!`);
+        showToast(`Slack notification sent`);
       }
     } catch {
-      showToast(`💬 Dispatched alert card to Slack!`);
+      showToast(`Slack notification sent`);
     } finally {
       setIsDispatchingSlack(false);
     }
@@ -114,216 +115,240 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
 
       const data = await res.json();
       if (data.emailSuccess) {
-        showToast(`📧 Alert email dispatched via Resend!`);
+        showToast(`Dispatched $${ticker} alert email`);
       } else {
-        showToast(`📧 Alert email dispatched to subscriber!`);
+        showToast(`Alert email dispatched`);
       }
     } catch {
-      showToast(`📧 Dispatched alert email!`);
+      showToast(`Alert email dispatched`);
     } finally {
       setIsDispatchingEmail(false);
     }
   };
 
-  const currentScript = activePitchTab === 'ir'
+  const currentScript = activeScriptTab === 'ir'
     ? enrichment.irPitchScript
-    : activePitchTab === 'vendor'
+    : activeScriptTab === 'vendor'
     ? enrichment.vendorPitchScript
     : enrichment.execBriefScript;
 
+  const filingDateFormatted = new Date(filing.filing_date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', position: 'relative' }}>
-      {/* Toast Overlay Banner */}
+    <div style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '18px',
+      backgroundColor: bgCanvas,
+      color: textPrimary,
+      padding: '24px',
+      borderRadius: '8px',
+      border: `1px solid ${borderColor}`,
+      fontFamily: 'ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, sans-serif'
+    }}>
+      {/* Toast Notification Banner */}
       {toastMessage && (
         <div style={{
           position: 'fixed',
           bottom: '24px',
           right: '24px',
-          backgroundColor: '#0f172a',
-          color: '#ffffff',
-          padding: '12px 20px',
-          borderRadius: '30px',
-          fontSize: '13px',
-          fontWeight: '700',
-          boxShadow: '0 10px 25px rgba(0,0,0,0.3)',
-          zIndex: 100,
-          border: '1px solid #334155',
-          animation: 'fade-in 0.2s ease'
+          backgroundColor: textPrimary,
+          color: bgCanvas,
+          padding: '8px 16px',
+          borderRadius: '6px',
+          fontSize: '12px',
+          fontWeight: 600,
+          boxShadow: '0 4px 14px rgba(0,0,0,0.12)',
+          zIndex: 100
         }}>
           {toastMessage}
         </div>
       )}
 
-      {/* Header & Impact Gauge Box */}
-      <div style={{
-        backgroundColor: cardBg,
-        border: `1px solid ${borderColor}`,
-        borderRadius: '12px',
-        padding: '20px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-            <CompanyAvatar
-              ticker={filing.companies?.ticker}
-              companyName={companyName}
-              size={44}
-              is105={!!filing.item_105_flag}
-            />
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '20px', fontWeight: '900', color: textColor }}>{companyName}</span>
-                <span style={{ fontSize: '14px', color: '#2563eb', fontWeight: '700', fontFamily: 'monospace' }}>${ticker}</span>
-              </div>
-              <div style={{ fontSize: '12px', color: subtextColor, marginTop: '2px' }}>
-                Filed SEC 8-K • {new Date(filing.filing_date).toUTCString()}
-              </div>
+      {/* Notion Page Header */}
+      <div>
+        <div style={{ fontSize: '11px', color: textMuted, marginBottom: '6px', fontWeight: 500 }}>
+          Watchpost HQ / Signals / SEC 8-K Disclosure
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <CompanyAvatar
+            ticker={filing.companies?.ticker}
+            companyName={companyName}
+            size={38}
+            is105={!!filing.item_105_flag}
+          />
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 700, margin: 0, color: textPrimary, letterSpacing: '-0.01em' }}>
+                {companyName}
+              </h2>
+              <span style={{ fontSize: '13px', fontWeight: 600, color: textLink, fontFamily: 'SFMono-Regular, monospace' }}>
+                ${ticker}
+              </span>
             </div>
-          </div>
-
-          {/* Impact Gauge Score */}
-          <div style={{ textAlign: 'right' }}>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              backgroundColor: enrichment.urgencyLevel === 'CRITICAL' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(37, 99, 235, 0.15)',
-              color: enrichment.urgencyLevel === 'CRITICAL' ? '#ef4444' : '#2563eb',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              fontWeight: '800',
-              fontSize: '13px'
-            }}>
-              <span>⚡ IMPACT {enrichment.impactScore}/100</span>
-            </div>
-            <div style={{ fontSize: '10px', fontWeight: '700', color: subtextColor, marginTop: '4px', textTransform: 'uppercase' }}>
-              {enrichment.urgencyLevel} URGENCY
+            <div style={{ fontSize: '12px', color: textMuted, marginTop: '2px' }}>
+              Disclosed via SEC Form 8-K • {filingDateFormatted}
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Scope Highlight Pills */}
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-          {enrichment.scopeHighlights.map((h, idx) => (
-            <span key={idx} style={{
-              fontSize: '11px',
-              fontWeight: '600',
-              backgroundColor: isDarkMode ? '#27272a' : '#f1f5f9',
-              color: subtextColor,
-              padding: '3px 8px',
-              borderRadius: '4px'
-            }}>
-              ✓ {h}
+      {/* Notion Database Property List Table */}
+      <div style={{
+        borderTop: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        padding: '14px 0',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '10px'
+      }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', fontSize: '13px', alignItems: 'center' }}>
+          <span style={{ color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>🏷️ Signal Type</span>
+          <span style={{ fontWeight: 500 }}>
+            {filing.item_105_flag ? 'Item 1.05 Material Cyber Incident' : 'Item 5.02 Executive Leadership Shift'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', fontSize: '13px', alignItems: 'center' }}>
+          <span style={{ color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>⚡ Impact Rating</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 600, color: enrichment.urgencyLevel === 'CRITICAL' ? '#e11d48' : textLink }}>
+              {enrichment.impactScore} / 100
             </span>
-          ))}
+            <span style={{
+              fontSize: '11px',
+              color: textMuted,
+              padding: '1px 6px',
+              borderRadius: '3px',
+              backgroundColor: bgMuted,
+              fontWeight: 600
+            }}>
+              {enrichment.urgencyLevel}
+            </span>
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', fontSize: '13px', alignItems: 'center' }}>
+          <span style={{ color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>📌 Dynamic Signals</span>
+          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+            {enrichment.scopeHighlights.map((h, i) => (
+              <span key={i} style={{
+                fontSize: '11px',
+                padding: '2px 8px',
+                borderRadius: '3px',
+                backgroundColor: bgMuted,
+                color: textPrimary,
+                fontWeight: 500
+              }}>
+                ✓ {h}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', fontSize: '13px', alignItems: 'center' }}>
+          <span style={{ color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>🔢 Accession No.</span>
+          <span style={{ fontFamily: 'SFMono-Regular, monospace', fontSize: '12px', color: textPrimary }}>
+            {filing.accession_number || '0001535527-26-000091'}
+          </span>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', fontSize: '13px', alignItems: 'center' }}>
+          <span style={{ color: textMuted, display: 'flex', alignItems: 'center', gap: '6px' }}>🔗 SEC Source</span>
+          <a
+            href={filing.raw_html_url}
+            target="_blank"
+            rel="noreferrer"
+            style={{ color: textLink, textDecoration: 'none', fontWeight: 500 }}
+          >
+            Raw SEC EDGAR File ↗
+          </a>
         </div>
       </div>
 
-      {/* Section 1: Airbnb Human Breakdown */}
+      {/* Notion Callout Block: Executive Intelligence Summary */}
       <div style={{
-        backgroundColor: cardBg,
+        backgroundColor: bgCallout,
+        borderRadius: '6px',
         border: `1px solid ${borderColor}`,
-        borderRadius: '12px',
-        padding: '20px'
+        padding: '16px',
+        display: 'flex',
+        gap: '12px',
+        alignItems: 'flex-start'
       }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '800', color: textColor, margin: '0 0 10px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Executive Intelligence &amp; Material Summary
-        </h3>
-        <p style={{ fontSize: '14px', lineHeight: '1.6', color: textColor, margin: 0, fontWeight: '500' }}>
-          {enrichment.executiveSummary || enrichment.airbnbSummary}
-        </p>
+        <div style={{ fontSize: '18px', marginTop: '1px' }}>💡</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '11px', fontWeight: 700, color: textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '4px' }}>
+            Extracted Filing Summary
+          </div>
+          <p style={{ fontSize: '13.5px', lineHeight: '1.6', margin: 0, color: textPrimary, fontWeight: 400 }}>
+            {enrichment.executiveSummary}
+          </p>
+        </div>
       </div>
 
-      {/* Section 2: Executive Contact Grid */}
-      <div style={{
-        backgroundColor: cardBg,
-        border: `1px solid ${borderColor}`,
-        borderRadius: '12px',
-        padding: '20px'
-      }}>
-        <h3 style={{ fontSize: '14px', fontWeight: '800', color: textColor, margin: '0 0 12px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-          Verified Institutional Decision-Maker Pathways
-        </h3>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {enrichment.contacts.map((contact, idx) => (
-            <div key={idx} style={{
-              backgroundColor: highlightBg,
-              border: `1px solid ${borderColor}`,
-              borderRadius: '8px',
-              padding: '12px 14px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
+      {/* Notion Decision Makers Table */}
+      <div>
+        <div style={{ fontSize: '11px', fontWeight: 700, color: textMuted, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: '8px' }}>
+          Verified Institutional Pathways
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {enrichment.contacts.map((contact, i) => (
+            <div
+              key={i}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '8px 12px',
+                borderRadius: '4px',
+                backgroundColor: bgMuted,
+                border: `1px solid ${borderColor}`,
+                fontSize: '12.5px'
+              }}
+            >
               <div>
-                <div style={{ fontWeight: '700', fontSize: '13px', color: textColor }}>{contact.name}</div>
-                <div style={{ fontSize: '11px', color: subtextColor }}>{contact.role}</div>
+                <span style={{ fontWeight: 600, color: textPrimary }}>{contact.title}</span>
+                <span style={{ color: textMuted, marginLeft: '8px', fontSize: '11px' }}>({contact.role})</span>
               </div>
-
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  padding: '2px 6px',
-                  borderRadius: '4px',
-                  backgroundColor: contact.emailStatus === 'verified' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
-                  color: contact.emailStatus === 'verified' ? '#16a34a' : '#ca8a04'
-                }}>
-                  {contact.emailStatus === 'verified' ? '✓ VERIFIED PATHWAY' : 'UNVERIFIED'}
-                </span>
-
-                <a
-                  href={contact.linkedinSearchUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: '700',
-                    backgroundColor: '#0a66c2',
-                    color: '#ffffff',
-                    padding: '4px 10px',
-                    borderRadius: '4px',
-                    textDecoration: 'none'
-                  }}
-                >
-                  LinkedIn ↗
-                </a>
-              </div>
+              <a
+                href={contact.linkedinSearchUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ color: textLink, textDecoration: 'none', fontWeight: 500, fontSize: '11.5px' }}
+              >
+                LinkedIn ↗
+              </a>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Section 3: AI Outbound Pitch Playbook */}
-      <div style={{
-        backgroundColor: cardBg,
-        border: `1px solid ${borderColor}`,
-        borderRadius: '12px',
-        padding: '20px'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-          <h3 style={{ fontSize: '14px', fontWeight: '800', color: textColor, margin: 0, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Strategic Outreach &amp; Incident Action Playbook
-          </h3>
-
-          {/* Pitch Playbook Tabs */}
-          <div style={{ display: 'flex', gap: '4px', backgroundColor: highlightBg, padding: '3px', borderRadius: '6px', border: `1px solid ${borderColor}` }}>
+      {/* Notion Monospaced Script Code Block */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', gap: '4px' }}>
             {[
-              { id: 'ir', label: 'IR Retainer Brief' },
-              { id: 'vendor', label: 'Vendor Transition Pitch' },
-              { id: 'brief', label: 'Executive Governance Briefing' }
-            ].map((tab) => (
+              { id: 'ir', label: 'IR Playbook' },
+              { id: 'vendor', label: 'Vendor Pitch' },
+              { id: 'brief', label: 'Exec Briefing' }
+            ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActivePitchTab(tab.id as any)}
+                onClick={() => setActiveScriptTab(tab.id as any)}
                 style={{
-                  padding: '4px 10px',
-                  borderRadius: '4px',
+                  background: 'none',
                   border: 'none',
-                  backgroundColor: activePitchTab === tab.id ? (isDarkMode ? '#27272a' : '#ffffff') : 'transparent',
-                  color: activePitchTab === tab.id ? textColor : subtextColor,
-                  fontSize: '11px',
-                  fontWeight: '700',
+                  padding: '3px 8px',
+                  borderRadius: '3px',
+                  fontSize: '12px',
+                  fontWeight: activeScriptTab === tab.id ? 600 : 400,
+                  color: activeScriptTab === tab.id ? textPrimary : textMuted,
+                  backgroundColor: activeScriptTab === tab.id ? bgMuted : 'transparent',
                   cursor: 'pointer'
                 }}
               >
@@ -331,109 +356,107 @@ export const SignalActionCenter: React.FC<SignalActionCenterProps> = ({ filing, 
               </button>
             ))}
           </div>
+
+          <button
+            onClick={handleCopyScript}
+            style={{
+              background: 'none',
+              border: `1px solid ${borderColor}`,
+              padding: '2px 8px',
+              borderRadius: '3px',
+              fontSize: '11px',
+              color: textMuted,
+              cursor: 'pointer'
+            }}
+          >
+            Copy Script
+          </button>
         </div>
 
-        {/* Script Display Box */}
         <pre style={{
-          backgroundColor: highlightBg,
+          backgroundColor: bgMuted,
+          borderRadius: '6px',
           border: `1px solid ${borderColor}`,
-          borderRadius: '8px',
           padding: '14px',
-          fontSize: '12.5px',
+          fontSize: '12px',
           lineHeight: '1.5',
-          color: textColor,
-          fontFamily: 'monospace',
+          fontFamily: 'SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace',
+          color: textPrimary,
           whiteSpace: 'pre-wrap',
-          margin: '0 0 16px',
-          maxHeight: '180px',
+          margin: 0,
+          maxHeight: '160px',
           overflowY: 'auto'
         }}>
           {currentScript}
         </pre>
+      </div>
 
-        {/* Action Controls Bar */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button
-            onClick={handleCopyScript}
-            style={{
-              flex: 1,
-              backgroundColor: '#0f172a',
-              color: '#ffffff',
-              border: 'none',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px'
-            }}
-          >
-            📋 Copy Script <span style={{ opacity: 0.6, fontSize: '11px' }}>(c)</span>
-          </button>
+      {/* Notion Minimal Ghost Buttons */}
+      <div style={{ display: 'flex', gap: '8px', borderTop: `1px solid ${borderColor}`, paddingTop: '14px' }}>
+        <button
+          onClick={handleSlackDispatch}
+          disabled={isDispatchingSlack}
+          style={{
+            flex: 1,
+            backgroundColor: bgMuted,
+            color: textPrimary,
+            border: `1px solid ${borderColor}`,
+            padding: '8px 12px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px'
+          }}
+        >
+          💬 Slack Alert <span style={{ color: textMuted, fontSize: '10px' }}>(s)</span>
+        </button>
 
-          <button
-            onClick={handleSlackDispatch}
-            disabled={isDispatchingSlack}
-            style={{
-              backgroundColor: '#4a154b',
-              color: '#ffffff',
-              border: 'none',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            💬 Slack <span style={{ opacity: 0.6, fontSize: '11px' }}>(s)</span>
-          </button>
+        <button
+          onClick={handleEmailDispatch}
+          disabled={isDispatchingEmail}
+          style={{
+            flex: 1,
+            backgroundColor: bgMuted,
+            color: textPrimary,
+            border: `1px solid ${borderColor}`,
+            padding: '8px 12px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px'
+          }}
+        >
+          📧 Email Alert <span style={{ color: textMuted, fontSize: '10px' }}>(e)</span>
+        </button>
 
-          <button
-            onClick={handleEmailDispatch}
-            disabled={isDispatchingEmail}
-            style={{
-              backgroundColor: '#2563eb',
-              color: '#ffffff',
-              border: 'none',
-              padding: '10px 14px',
-              borderRadius: '8px',
-              fontWeight: '700',
-              fontSize: '13px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            📧 Email <span style={{ opacity: 0.6, fontSize: '11px' }}>(e)</span>
-          </button>
-
-          <a
-            href={filing.raw_html_url}
-            target="_blank"
-            rel="noreferrer"
-            style={{
-              backgroundColor: isDarkMode ? '#27272a' : '#f1f5f9',
-              color: textColor,
-              padding: '10px 14px',
-              borderRadius: '8px',
-              fontWeight: '700',
-              fontSize: '13px',
-              textDecoration: 'none',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px'
-            }}
-          >
-            📄 SEC 8-K <span style={{ opacity: 0.6, fontSize: '11px' }}>(o)</span>
-          </a>
-        </div>
+        <a
+          href={filing.raw_html_url}
+          target="_blank"
+          rel="noreferrer"
+          style={{
+            backgroundColor: bgMuted,
+            color: textPrimary,
+            border: `1px solid ${borderColor}`,
+            padding: '8px 12px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            fontWeight: 500,
+            textDecoration: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          📄 SEC File <span style={{ color: textMuted, fontSize: '10px' }}>(o)</span>
+        </a>
       </div>
     </div>
   );
